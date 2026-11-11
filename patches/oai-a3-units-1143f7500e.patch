@@ -1,0 +1,33 @@
+--- a/openair2/RRC/NR_UE/rrc_UE.c
++++ b/openair2/RRC/NR_UE/rrc_UE.c
+@@ -3090,8 +3090,8 @@
+     return;
+   }
+ 
+-  int rsrp_offset = event_A3->a3_Offset.choice.rsrp >> 1;
+-  int rsrp_hysteresis = event_A3->hysteresis;
++  const double rsrp_offset = 0.5 * event_A3->a3_Offset.choice.rsrp;
++  const double rsrp_hysteresis = 0.5 * event_A3->hysteresis;
+ 
+   // Check all neighboring cells for Event A3 condition
+   bool entry_cond_met = false;
+@@ -3131,7 +3131,7 @@
+                      event_A3->timeToTrigger);
+ 
+     LOG_W(NR_RRC,
+-          "(neighboring_cell_rsrp) %i > (serving_cell_rsrp %i) + (rsrp_offset) %i + (rsrp_hysteresis) %i\n",
++          "(neighboring_cell_rsrp) %i > (serving_cell_rsrp %i) + (rsrp_offset) %.1f + (rsrp_hysteresis) %.1f\n",
+           entry_neighbor_rsrp,
+           serving_cell_rsrp,
+           rsrp_offset,
+--- a/openair2/RRC/NR/rrc_gNB.c
++++ b/openair2/RRC/NR/rrc_gNB.c
+@@ -1858,7 +1858,7 @@
+           // Additional check - This part can be modified according to additional cell specific Handover Margin
+           // a3-Offset: The actual value is field value * 0.5 dB.
+           if (a3_event_configuration
+-              && ((a3_event_configuration->a3_offset * 0.5 + a3_event_configuration->hysteresis)
++              && ((a3_event_configuration->a3_offset * 0.5 + a3_event_configuration->hysteresis * 0.5)
+                   < (neighbourCellRSRP - servingCellRSRP))) {
+             if (neighbourCellRSRP > best_rsrp) {
+               // UE can send multiple neighbour cells A3 event report in 1 Meas Report. So, we need to find the best neighbour

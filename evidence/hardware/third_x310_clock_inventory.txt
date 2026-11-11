@@ -1,0 +1,55 @@
+[INFO] [UHD] linux; GNU C++ version 13.3.0; Boost_108300; UHD_4.11.0.HEAD-0-g0d7ed3b1
+[INFO] [X300] X300 initialization sequence...
+[INFO] [X300] Maximum frame size: 1472 bytes.
+[INFO] [X300] Radio 1x clock: 184.32 MHz
+{
+  "device_args": "type=x300,addr=192.168.10.5,serial=34AF675,master_clock_rate=184.32e6",
+  "uhd_module": "/usr/local/lib/python3.12/site-packages/uhd/__init__.py",
+  "subdev": "B:0",
+  "rx_info": {
+    "mboard_id": "X310",
+    "mboard_name": "",
+    "mboard_serial": "34AF675",
+    "module_serial": "34AF675",
+    "rx_antenna": "RX2",
+    "rx_id": "UBX-160 v2 (0x007e)",
+    "rx_ref_power_key": "x3xx_pwr_generic_rx_rx2",
+    "rx_ref_power_serial": "34F0292#0",
+    "rx_serial": "34F0292",
+    "rx_subdev_name": "UBX RX",
+    "rx_subdev_spec": "B:0"
+  },
+  "tx_info": {
+    "mboard_id": "X310",
+    "mboard_name": "",
+    "mboard_serial": "34AF675",
+    "module_serial": "34AF675",
+    "tx_antenna": "TX/RX",
+    "tx_id": "UBX-160 v2 (0x007d)",
+    "tx_ref_power_key": "x3xx_pwr_generic_tx_tx+rx",
+    "tx_ref_power_serial": "34F0292#0",
+    "tx_serial": "34F0292",
+    "tx_subdev_name": "UBX TX",
+    "tx_subdev_spec": "B:0"
+  },
+  "tx_gain_range": {
+    "min_db": 0.0,
+    "max_db": 31.5,
+    "step_db": 0.5
+  },
+  "rx_gain_range": {
+    "min_db": 0.0,
+    "max_db": 37.5,
+    "step_db": 0.5
+  },
+  "clock_source": "external",
+  "time_source": "internal",
+  "ref_locked": true,
+  "master_clock_hz": 184320000.0,
+  "rx_rate_sps": 7680000.0,
+  "rx_antenna": "RX2",
+  "tx_antenna": "TX/RX",
+  "external_pps_verified": false,
+  "streamers_created": false,
+  "transmits": false
+}

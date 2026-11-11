@@ -1,0 +1,113 @@
+{
+  "date": "2026-11-09",
+  "retained": [
+    {
+      "original": "runs/exp2/rfsim_stage1_001",
+      "retained": "evidence/rfsim/n78_single_20261109.tar.gz",
+      "sha256": "e3f51802fc13dc8843e6f79d9c26ec798b4938694f18db49a0bed0dceadc879f"
+    },
+    {
+      "original": "runs/exp2/rfsim_ho_001",
+      "retained": "evidence/rfsim/n78_handover_20261109.tar.gz",
+      "sha256": "d148d76f397aeeb504a564b0c890dd162f05dd021b83ad0f36692de3700283b5"
+    },
+    {
+      "original": "runs/rfsim_n66_001",
+      "retained": "evidence/rfsim/n66_measurement_caveat_20261109.tar.gz",
+      "sha256": "9b731ba77217b52c99e3dc76ce9b90a94d64464063a486dba5ef11a22da7f63b"
+    },
+    {
+      "original": "runs/exp1_tools_check",
+      "retained": "evidence/hardware/exp1_tools_check"
+    },
+    {
+      "original": "runs/oai_build",
+      "retained": "evidence/hardware/oai_build"
+    },
+    {
+      "original": "runs/qualify_three_x310_rx.py",
+      "retained": "evidence/hardware/qualify_three_x310_rx.py"
+    },
+    {
+      "original": "runs/rx_check_1",
+      "retained": "evidence/hardware/rx_check_1"
+    },
+    {
+      "original": "runs/rx_check_summary.json",
+      "retained": "evidence/hardware/rx_check_summary.json"
+    },
+    {
+      "original": "runs/third_x310_before_update.bit",
+      "retained": "evidence/hardware/third_x310_before_update.bit"
+    },
+    {
+      "original": "runs/third_x310_clock_inventory.json",
+      "retained": "evidence/hardware/third_x310_clock_inventory.json"
+    },
+    {
+      "original": "runs/third_x310_clock_inventory.py",
+      "retained": "evidence/hardware/third_x310_clock_inventory.py"
+    },
+    {
+      "original": "runs/third_x310_clock_inventory.txt",
+      "retained": "evidence/hardware/third_x310_clock_inventory.txt"
+    },
+    {
+      "original": "runs/third_x310_flash.txt",
+      "retained": "evidence/hardware/third_x310_flash.txt"
+    },
+    {
+      "original": "runs/third_x310_image_backup.txt",
+      "retained": "evidence/hardware/third_x310_image_backup.txt"
+    },
+    {
+      "original": "runs/third_x310_probe.txt",
+      "retained": "evidence/hardware/third_x310_probe.txt"
+    },
+    {
+      "original": "runs/third_x310_probe_after_update.txt",
+      "retained": "evidence/hardware/third_x310_probe_after_update.txt"
+    },
+    {
+      "original": "runs/third_x310_setup.json",
+      "retained": "evidence/hardware/third_x310_setup.json"
+    },
+    {
+      "original": "runs/three_x310_rx_qualification",
+      "retained": "evidence/hardware/three_x310_rx_qualification"
+    }
+  ],
+  "deleted": [
+    "runs/e2e",
+    "runs/review_20261109",
+    "runs/rfsim_n66_001",
+    "runs/exp2",
+    "experiments/exp1_cell_on_air",
+    "experiments/exp2_ota_handover",
+    "examples/synthetic_comparison",
+    "examples/synthetic_demo",
+    "configs/bench_f1_a3.yaml",
+    "configs/bench_f1_manual.yaml",
+    "configs/bench_iphone_f1_manual.yaml",
+    "configs/bench_nrue_f1_manual.yaml",
+    "configs/bench_nrue_single_cell.yaml",
+    "configs/hardware_f1_a3.yaml",
+    "configs/hardware_f1_manual.yaml",
+    "configs/hardware_n2_manual.yaml",
+    "configs/rfsim_f1.yaml",
+    "configs/rfsim_f1_n66.yaml",
+    "configs/rfsim_n2.yaml",
+    "configs/sweep_a3.yaml",
+    "tests/review_test_run.txt",
+    "tests/last_test_run.txt",
+    "examples/shadow42.csv.json",
+    "examples/ramp.csv.json",
+    "runs/third_x310_proposed_shared.yaml",
+    "runs/rfsim_n78_single_001 (preliminary 20 s check; temporary raw archive /tmp/oaiho_preliminary_single_20s_20261109.tar.gz)",
+    "examples/ramp.csv",
+    "examples/shadow42.csv"
+  ],
+  "cleanup_pending": [],
+  "rollback_archive": "/tmp/usrp_framework_before_cleanup_20261109.tar.gz",
+  "archive_exclusion": "unreadable oaitelnet.history; command evidence remains in trigger journals and CU logs"
+}

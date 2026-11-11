@@ -1,0 +1,5 @@
+condition,summary
+rfsim_baseline,../runs/baseline_rep01/report/summary.json
+rfsim_baseline,../runs/baseline_rep02/report/summary.json
+rfsim_manual_F1,../runs/manual_rep01/report/summary.json
+rfsim_manual_F1,../runs/manual_rep02/report/summary.json

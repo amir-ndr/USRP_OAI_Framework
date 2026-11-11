@@ -1,0 +1,120 @@
+{
+  "observed_at_utc": "2026-11-09T23:34:14.906300+00:00",
+  "radio": {
+    "ip": "192.168.10.5",
+    "serial": "34AF675",
+    "product": "X310",
+    "fpga_flavor": "HG",
+    "daughterboard_user_report": "UBX-160",
+    "daughterboard_probe_verified": true,
+    "subdev": "B:0",
+    "daughterboard": "UBX-160 v2",
+    "daughterboard_serial": "34F0292",
+    "tx_gain_range": {
+      "min_db": 0.0,
+      "max_db": 31.5,
+      "step_db": 0.5
+    },
+    "rx_gain_range": {
+      "min_db": 0.0,
+      "max_db": 37.5,
+      "step_db": 0.5
+    }
+  },
+  "host_link": {
+    "interface": "enx00e04c680014",
+    "speed_mbps": 1000,
+    "host_ipv4": [
+      "192.168.10.1/24",
+      "192.168.20.1/24"
+    ],
+    "planning_mbps_per_direction_three_radios": 781.5168,
+    "configured_budget_mbps": 700
+  },
+  "discovery": "success",
+  "ping": "2/2 replies",
+  "probe": {
+    "status": "success",
+    "log": "runs/third_x310_probe_after_update.txt",
+    "fpga_version": "39.3",
+    "fpga_git_hash": "881f19d",
+    "firmware_version": "6.1"
+  },
+  "replacement_image": {
+    "path": "/usr/local/share/uhd/images/usrp_x310_fpga_HG.bit",
+    "bytes": 15878040,
+    "sha256": "4002d070832a5c4ae1af506b7c04be9bb226aba05cf7abb8e034b22789c4e1a6",
+    "installed_inventory_package": "x3xx_x310_fpga_default-g881f19d.zip"
+  },
+  "flash_performed": true,
+  "rf_stream_started": true,
+  "pending": [
+    "Clean concurrent transport path and full-duplex OAI CPU/streaming qualification",
+    "UE network namespace without local PDU-address bypass",
+    "Qualified RF pads/cables/splitter-combiners and input-power budget",
+    "Single-cell OAI UE attachment before handover"
+  ],
+  "backup": {
+    "path": "runs/third_x310_before_update.bit",
+    "bytes": 15878042,
+    "sha256": "b8e36f9aafa7c6e8f6b430e59b2f5b326e7d4589df0c32d3ebf99f4f0302ef21",
+    "readback_exit_code": 0,
+    "restore_tested": false,
+    "bit_header_declared_bytes": 15878040,
+    "trailing_flash_bytes": 2,
+    "log": "runs/third_x310_image_backup.txt"
+  },
+  "planned_flash_argv": [
+    "/usr/local/bin/uhd_image_loader",
+    "--no-fw",
+    "--args",
+    "type=x300,addr=192.168.10.5,serial=34AF675,fpga=HG,verify"
+  ],
+  "flash_status": "successful; activated by user power-cycle; UHD initialization verified",
+  "user_confirmed": {
+    "octoclock_connected": true,
+    "clock_lock_verified": true,
+    "fixed_attenuators": {
+      "model": "Mini-Circuits VAT-30A+",
+      "quantity": 2,
+      "nominal_db_each": 30,
+      "impedance_ohm": 50,
+      "datasheet_input_w_at_25C": 1.0,
+      "datasheet_url": "https://www.minicircuits.com/pdfs/VAT-30A%2B.pdf"
+    },
+    "second_host_ethernet_adapter": "not confirmed; current connection uses one shared adapter",
+    "three_radios_share_switch_and_host_adapter": true,
+    "fpga_update_authorized": true,
+    "third_x310_power_cycled": true
+  },
+  "flash_write_attempted": true,
+  "flash_log": "runs/third_x310_flash.txt",
+  "flash_started_recorded_utc": "2026-11-09T23:47:37.152483+00:00",
+  "flash_returncode": 0,
+  "flash_device_verification_enabled": true,
+  "flash_finished_recorded_utc": "2026-11-09T23:54:59.795832+00:00",
+  "post_reboot_probe_pending": false,
+  "initial_probe": {
+    "status": "failed",
+    "software_rfnoc_protocol": "2.0",
+    "hardware_rfnoc_protocol": "1.0",
+    "log": "runs/third_x310_probe.txt"
+  },
+  "external_clock_check": {
+    "ref_locked": true,
+    "clock_source": "external",
+    "time_source": "internal",
+    "external_pps_verified": false,
+    "log": "runs/third_x310_clock_inventory.json"
+  },
+  "rx_stream_started": true,
+  "tx_stream_started": false,
+  "transport_test_status": "Completed RX-only screening: UE alone clean; all three concurrent show RX loss",
+  "post_reboot_verification_recorded_utc": "2026-11-09T23:59:24.808094+00:00",
+  "transport_test_report": "runs/three_x310_rx_qualification/report.md",
+  "transport_test_metrics": "runs/three_x310_rx_qualification/metrics.json",
+  "transport_ring_rx_current": 4096,
+  "transport_ring_rx_maximum": 4096,
+  "host_socket_rmem_max": 33554432,
+  "host_socket_wmem_max": 33554432
+}

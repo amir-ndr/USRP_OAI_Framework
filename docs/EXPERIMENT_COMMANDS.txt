@@ -1,0 +1,232 @@
+USRP / OAI EXPERIMENT COMMAND GUIDE
+Updated 2026-11-11. Commands run from ~/Downloads/USRP_5g_OAI unless stated otherwise.
+
+0. CHOOSE THE EXPERIMENT
+
+One YAML, configs/lab_n78.yaml, describes both backends. Hardware mode drives USRPs;
+RFsim transports software samples and opens no radio. The PHY and measurement procedure
+remain matched, but RFsim wall-clock timing is not equivalent to real RF timing.
+
+Current hardware: A=192.168.10.2 cell, C=192.168.10.5 UE, both slot-B TX/RX and RX2 fitted.
+B=192.168.20.6 is inactive. One active cell permits attachment/traffic, not handover.
+UE C now has dedicated adapter enx9c69d381261e, with host 192.168.10.11/32 and a /32 UE route.
+Both radios now answer on separate interfaces; the original adapter was restored on 2026-11-11.
+Each n78 radio needs about 521 Mbit/s per direction. Concurrent full-rate RX failed qualification
+with sequence errors and timeouts; resolve streaming before any OAI RF run (see VALIDATION.md).
+Authorization recorded from operator: 3300--3800 MHz, maximum EIRP 20 dBm.
+Carrier 3604.8 MHz: nominal channel edges 3599.8--3609.8 MHz; resource grid 8.64 MHz.
+The antenna models and RF power/coupling still need qualification at n78.
+VERT2450 has no specified performance there. Do not mark RF checks passed by assumption.
+
+1. SOFTWARE SETUP
+
+cd ~/Downloads/USRP_5g_OAI
+source .venv/bin/activate
+python -m pip install -e .
+E=configs/lab_n78.yaml
+python -m unittest discover -s tests -v
+oaiho profiles
+oaiho validate "$E"
+oaiho gains "$E"
+
+pip installs the editable Python package, including plotting dependencies. It does not build OAI.
+Tests use local loopback sockets and temporary files; no USRP opens. validate without --live
+checks configuration, not permission to transmit. gains prints requested UHD gain, not RF dBm.
+
+If template cache is missing:
+oaiho fetch --checkout ~/openairinterface5g
+
+If the pinned OAI must be rebuilt, in another terminal:
+cd ~/openairinterface5g/cmake_targets
+./build_oai --ninja -w USRP --gNB --nrUE --build-lib telnetsrv --cmake-opt -DUHD_DIR=/usr/local/lib/cmake/uhd
+
+Do not add -I on this host: it would replace/remove the source-built UHD setup.
+Do not update FPGA images or source revisions merely to run an experiment.
+
+2. RFSIM: ONE-CELL ATTACHMENT QUALIFICATION
+
+RUN=runs/rfsim_single_$(date -u +%Y%m%dT%H%M%SZ)
+oaiho session "$E" --set mode=rfsim --cells du0 --duration 60 --out "$RUN"
+oaiho session "$E" --set mode=rfsim --cells du0 --duration 60 --out "$RUN" --execute
+
+The first command previews. The second starts core -> dashboard -> CU -> DU0 -> UE -> probe.
+Open http://127.0.0.1:8050 during the run. With one active cell, the trigger button is hidden.
+The runner waits for a new PDU session, checks the tunnel address and verifies the initial PCI.
+Expect attachment and answered probes; inspect summary.md even if the process exits successfully.
+
+3. RFSIM: MANUAL F1 HANDOVER
+
+RUN=runs/rfsim_ho_$(date -u +%Y%m%dT%H%M%SZ)
+oaiho session "$E" --set mode=rfsim --cells du0,du1 --duration 120 --ho-every 20 --out "$RUN"
+oaiho session "$E" --set mode=rfsim --cells du0,du1 --duration 120 --ho-every 20 --out "$RUN" --execute
+
+Order: core -> dashboard -> CU -> DU0 -> UE attached on DU0 -> DU1 -> probe.
+Requests occur at 20,40,60,80,100 s after traffic starts, leaving an observation tail.
+--ho-count 2 limits their number. --ho-first 30 changes the first time.
+For dashboard-only triggering, omit --ho-every; click once and wait for the result.
+These are timed MANUAL network requests, not A3 decisions or simulated movement.
+Completion comes from the CU's specific handover-complete event, not a telnet acknowledgement.
+
+4. RECEIVE-ONLY HARDWARE INSPECTION
+
+Stop every OAI modem before opening the same radio through a UHD tool.
+oaiho doctor "$E"
+oaiho inventory "$E"
+oaiho inventory "$E" --execute
+oaiho clock-check "$E"
+oaiho clock-check "$E" --execute
+oaiho rx-check "$E" --out runs/rx_n78_001
+oaiho rx-check "$E" --out runs/rx_n78_001 --execute
+
+Use a new output directory each time. doctor checks host/build/routes, without opening UHD.
+inventory --execute initializes active radios to read identity, without streaming.
+clock-check inspects active cells, adding the pair/PPS test when two cells are active.
+It also checks C's external 10 MHz lock in reference-only mode, without requiring UE PPS.
+C derives frame timing from its serving cell. An attached cable alone does not verify lock.
+rx-check scans active cell(s) AND C on RX2 and TX/RX, using the profile's full sample rate.
+rx_check.json/png contain ADC-relative levels, not calibrated absolute dBm.
+Short captures cannot prove absence of intermittent signals or characterize emission compliance.
+Both transport-route checks passed on 2026-11-11; doctor does not test streaming reliability.
+
+5. HARDWARE PREREQUISITES
+
+A. Ethernet: both USB adapters must be passed through to Ubuntu, not reserved by the laptop host.
+Restore the original cell adapter in your Ubuntu terminal (sudo asks for your password locally):
+bash scripts/usrp_link_up.sh
+
+Restore the persistent UE profile if needed:
+nmcli connection up oaiho-ue-x310
+ip -br link
+ip route get 192.168.10.2
+ip route get 192.168.10.5
+
+Expected: A uses enx00e04c680014, source 192.168.10.1; C uses enx9c69d381261e, source 192.168.10.11.
+Do not reconfigure ens33, which carries VM management/internet traffic.
+The original adapter is deliberately marked unmanaged by a root-owned NetworkManager rule.
+The new UE profile has no default gateway; it does not replace the VM internet route.
+Qualify concurrent RX at 15.36 MS/s and inspect loss/sequence/NIC counters before OAI RF.
+
+For future adapter replacements, update host.links and the appropriate usrp_link to the real name.
+The alternative scripts/usrp_dedicated_link.sh changes ARP/RPF settings and buffers and needs sudo;
+it is not needed to recreate the already-configured NetworkManager UE profile.
+For three radios, provide a third dedicated link or a measured multi-gigabit shared uplink.
+
+B. RF: verify the licence document covers this channel, location and equipment; record its reference.
+Use characterized n78 antennas, suitable 50-ohm cables and the correct SMA connector polarity.
+Confirm both slot-B RF ports. Disable transmitters before touching RF connectors.
+Follow docs/RF_SAFETY.md for commissioning; a protected room does not protect nearby RF inputs.
+Fill tx_power_bounds with qualified connector peaks and TX antenna gain, covering profile,
+frequency, gain cap, waveform and startup/restart. Gain settings or ADC dBFS cannot establish these absolute peaks.
+Replace each relevant ota estimate with minimum_passive_loss_db and qualified coupling evidence.
+Include own TX->RX2 coupling and UE uplink. Set flags only for completed checks, with evidence_note.
+Leave single_cell_attach_verified false until BOTH cells have carried traffic independently.
+
+oaiho budget "$E"
+oaiho validate "$E" --live
+oaiho doctor "$E" --ping
+
+A budget pass is conditional on its supplied facts. Rewording TODO evidence does not qualify it.
+Cell gain requests are 0.5 dB; UE gain is 0 dB. These are not measured output dBm.
+
+6. HARDWARE: CELL A + UE C
+
+RUN=runs/usrp_single_$(date -u +%Y%m%dT%H%M%SZ)
+oaiho session "$E" --set mode=hardware --cells du0 --duration 120 --out "$RUN"
+oaiho session "$E" --set mode=hardware --cells du0 --duration 120 --out "$RUN" --execute
+
+This is the hardware counterpart of section 2. It uses the same protocol startup, dashboard,
+probe and output formats. It refuses RF launch until live checks and actual routes/speeds pass.
+
+When B has qualified RF and Ethernet, test B by itself:
+RUN=runs/usrp_du1_$(date -u +%Y%m%dT%H%M%SZ)
+oaiho session "$E" --set mode=hardware --cells du1 --duration 120 --out "$RUN" --execute
+
+Only after both single-cell tests work, record single_cell_attach_verified: true.
+
+7. HARDWARE HANDOVER: FUTURE, REQUIRES B
+
+Provide the sixth appropriately specified antenna for separate TX/RX+RX2 routing, qualify B
+and all cross-coupling paths, and provide enough actual host uplink capacity for three radios.
+Rename nic_du1 to its real interface and verify its route. B stays inactive by default.
+
+RUN=runs/usrp_ho_$(date -u +%Y%m%dT%H%M%SZ)
+oaiho session "$E" --set mode=hardware --cells du0,du1 --duration 180 --ho-every 20 --out "$RUN"
+oaiho session "$E" --set mode=hardware --cells du0,du1 --duration 180 --ho-every 20 --out "$RUN" --execute
+
+This requests eight manual handovers. Stop for interlock trips or persistent transport errors.
+
+OPTIONAL SOFTWARE PROFILE CHECK: n66 (NO RF)
+
+oaiho session "$E" --set mode=rfsim --set radio.profile=n66_25prb_15khz --set radio.dl_center_mhz=null --cells du0,du1 --duration 120 --ho-every 20 --out runs/rfsim_n66_001
+
+Preview first; append --execute only for the software rehearsal. This preserves the authorization
+record but does not apply it to simulated frequencies. It does NOT authorize n66 RF transmission.
+The renderer supplies the n66 duplex offset and SSB position; do not hand-edit them independently.
+
+8. RESULTS, REPLAY AND COMPARISON
+
+cat "$RUN/summary.md"
+ls "$RUN"/*.csv "$RUN"/*.png "$RUN/report"/traffic.png
+xdg-open "$RUN/report/report.html"
+oaiho dashboard "$RUN/config.yaml" --replay "$RUN" --speed 1
+
+Replay reads saved observations without starting OAI or UHD. To regenerate analysis:
+oaiho events "$RUN/config.yaml" --run "$RUN" --out "$RUN/events_rechecked.csv"
+oaiho analyze --packets "$RUN/packets.jsonl" --events "$RUN/events_rechecked.csv" --config "$RUN/config.yaml" --out "$RUN/reanalysis" --plots
+
+Use a NEW report directory. A comparison manifest has columns condition,summary; each row
+points to an independent run's report/summary.json relative to that manifest. Do not use the
+top-level session summary.json. See examples/comparisons.csv for the format.
+oaiho compare --manifest runs/comparisons.csv --out runs/comparison_001
+oaiho compare --manifest runs/comparisons.csv --out runs/comparison_002 --mixed-modes
+
+Mixed modes remain labelled separately; they do not acquire equivalent timing semantics.
+Report failures, unknown outcomes, censored probes, coverage and transport errors with medians.
+For a controlled comparison keep BOTH DUs active in both conditions and use equal durations:
+oaiho session "$E" --set mode=rfsim --cells du0,du1 --duration 120 --out runs/baseline_rep01 --execute
+oaiho session "$E" --set mode=rfsim --cells du0,du1 --duration 120 --ho-every 20 --out runs/manual_rep01 --execute
+Repeat independent sessions with randomized condition order. Hardware comparisons use the same
+selection with mode=hardware after qualification. A single-cell attach test is not that matched reference. Short verification runs
+with different durations test the workflow only; they are not a controlled performance comparison.
+
+9. SUPPORTING COMMANDS
+
+oaiho render "$E" --out runs/render_preview_001
+  Writes OAI configs and a manifest; no modem starts.
+oaiho run-node "$E" --rendered runs/render_preview_001 --node cu
+  Previews one node. --execute --sudo launches it. Prefer session for ordinary runs.
+oaiho trigger "$RUN/config.yaml" --ue-id 1 --target-pci 1
+  Previews control; --execute acts on an existing attached two-cell session.
+  At this pin, two-DU F1 control chooses the other DU; target-pci is checked, not freely selected.
+oaiho probe --method ping --device oaitun_ue1 --host 192.168.70.135 --out runs/probe.jsonl --duration 30
+  Starts traffic immediately. Its tunnel binding avoids a root-namespace local-address shortcut.
+oaiho rx-monitor "$E" --out runs/rxmon.jsonl
+  Previews passive PSS/level monitoring on C; --execute receives only. Stop nrUE first.
+  C cannot run nrUE and rx-monitor simultaneously: one UHD owner per radio.
+oaiho tone-cal "$E" --set safety.rf_setup=conducted --dry-run
+  Previews commissioning. --execute --dry-run reads settings/receives without sending a tone.
+  Removing --dry-run TRANSMITS and requires a qualified conducted physical setup.
+  Its gain-derived nominal dBm is not absolute RF calibration.
+oaiho calibration-report --steps runs/cal_step_1 runs/cal_step_2 --out runs/cal_report_001
+  Summarizes existing receive-only calibration captures; does not open radios.
+oaiho trace --kind ramp --duration 60 --step 1 --low 10 --high 40 --out runs/ramp.csv
+  Writes a programmable-attenuation schedule, not a measured RF channel.
+oaiho replay "$E" --trace runs/ramp.csv --journal runs/attenuator.jsonl
+  Previews attenuator commands. --execute needs a qualified adapter/readback and protected paths.
+oaiho sweep "$E" --set handover.trigger=a3 --grid examples/a3_grid.yaml --out runs/schedule_001
+  Future A3 scheduling example only: it does not launch radios or qualify A3. Do not interpret
+  threshold/TTT changes under manual triggering as an A3 performance study.
+
+10. STOP
+
+Ctrl+C requests cleanup and final artifacts. Session-started core containers are stopped;
+pre-existing running containers are preserved. --keep-core and --keep-dashboard retain services.
+--no-core means you provide an already working core yourself.
+bash scripts/stop_all.sh
+  Broad emergency stop of project/OAI processes on this host, not a core deployment manager.
+pgrep -a -x 'nr-softmodem|nr-uesoftmodem'
+  Check for leftover modems. Inspect Docker separately if you retained the core.
+
+Further explanations: docs/CONCEPTS.md and docs/COMMAND_REFERENCE.md.
+Future parts, UE provisioning and emulator assessment: docs/FUTURE_EVALUATIONS.md,
+docs/UE_SETUP.md and docs/CHANNEL_EMULATOR.md.

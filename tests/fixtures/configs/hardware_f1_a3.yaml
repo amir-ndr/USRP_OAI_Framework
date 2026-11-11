@@ -1,0 +1,193 @@
+# EXAMPLE: generic template, NOT this lab (use configs/bench_*.yaml for the two X310s here).
+# Unknown hardware and RF budgets intentionally block live transmission; 106 PRB needs a 10 GbE link per radio.
+schema_version: 2
+mode: hardware
+topology: f1
+experiment:
+  name: hardware_f1_a3
+  repetition: 0
+  seed: 1
+paths:
+  oai_root: /home/amirndr/openairinterface5g
+  nr_softmodem: /home/amirndr/openairinterface5g/cmake_targets/ran_build/build/nr-softmodem
+  nr_uesoftmodem: /home/amirndr/openairinterface5g/cmake_targets/ran_build/build/nr-uesoftmodem
+  ue_uicc_config: /home/amirndr/nrue.uicc.conf
+  uhd_prefix: /usr/local
+host:
+  links:
+    ens1f0:
+      mbps: 10000
+      max_utilization: 0.7
+clock:
+  octoclock_ip: 192.168.10.3
+plmn:
+  mcc: '001'
+  mnc: '01'
+  tac: 1
+  sst: 1
+  sd: null
+core:
+  amf_ip: 192.168.70.132
+cu:
+  gnb_id: 3584
+  f1_ip: 127.0.0.3
+  n2_ip: 192.168.70.129/24
+  n3_ip: 192.168.70.129/24
+  telnet_ip: 127.0.0.2
+  telnet_port: 9090
+radio:
+  profile: n78_106prb_30khz
+  clock_source: external
+  time_source: external
+  continuous_tx: false
+  prach_target_dbm: null
+security:
+  ciphering:
+  - nea0
+  integrity:
+  - nia2
+  - nia0
+  drb_ciphering: true
+  drb_integrity: false
+ue:
+  kind: cots_modem
+handover:
+  trigger: a3
+  periodic_reports: true
+  offset_db: 3.0
+  hysteresis_db: 1.0
+  ttt_ms: 160
+cells:
+- name: du0
+  pci: 0
+  nr_cellid: 12345678
+  du_id: 3584
+  gnb_id: 3584
+  f1_ip: 127.0.0.4
+  n2_ip: 192.168.70.129/24
+  n3_ip: 192.168.70.129/24
+  ssb_bitmap: 1
+  usrp_ip: 192.168.30.2
+  serial: UNKNOWN
+  daughterboard: UNKNOWN
+  subdev: A:0
+  att_tx_db: 31.0
+  att_rx_db: 0.0
+  max_rxgain: 85.0
+  tx_gain_min_db: null
+  tx_gain_max_db: null
+  telnet_ip: 127.0.0.4
+  telnet_port: 9090
+  usrp_link: ens1f0
+  rx_gain_min_db: null
+  rx_gain_max_db: null
+- name: du1
+  pci: 1
+  nr_cellid: 11111111
+  du_id: 3585
+  gnb_id: 3585
+  f1_ip: 127.0.0.5
+  n2_ip: 192.168.70.130/24
+  n3_ip: 192.168.70.130/24
+  ssb_bitmap: 2
+  usrp_ip: 192.168.40.2
+  serial: UNKNOWN
+  daughterboard: UNKNOWN
+  subdev: A:0
+  att_tx_db: 31.0
+  att_rx_db: 0.0
+  max_rxgain: 85.0
+  tx_gain_min_db: null
+  tx_gain_max_db: null
+  telnet_ip: 127.0.0.5
+  telnet_port: 9090
+  usrp_link: ens1f0
+  rx_gain_min_db: null
+  rx_gain_max_db: null
+rfsim:
+  ue_server_ip: 127.0.0.1
+  port: 4043
+rfsim_channel:
+  enabled: false
+  model: AWGN
+  ploss_db: 0.0
+  noise_power_db: -80.0
+  forgetfact: 0.0
+  offset_samples: 0
+  ds_tdl: 0.03
+attenuator:
+  adapter_argv: []
+  readback_qualified: false
+  min_db: 0
+  max_db: 60
+  safe_db: 60
+  minimum_interval_s: 1.0
+  maximum_lateness_s: 0.5
+  timeout_s: 3.0
+safety:
+  rf_setup: conducted
+  max_uhd_tx_gain_db: 10.0
+  ue_pmax_dbm: 0
+  rf_path_reviewed: false
+  spectrum_authorized: false
+  clock_and_pps_verified: false
+  host_time_synchronized: false
+  single_cell_attach_verified: false
+  gain_mapping_verified: false
+  evidence_note: ''
+  receivers:
+  - name: du0
+    max_input_dbm: null
+    margin_db: 10.0
+    limit_source: ''
+    paths:
+    - source: du0
+      source_peak_dbm: null
+      minimum_passive_loss_db: null
+      uncertainty_db: 3.0
+      evidence: ''
+    - source: du1
+      source_peak_dbm: null
+      minimum_passive_loss_db: null
+      uncertainty_db: 3.0
+      evidence: ''
+    - source: ue
+      source_peak_dbm: null
+      minimum_passive_loss_db: null
+      uncertainty_db: 3.0
+      evidence: ''
+  - name: du1
+    max_input_dbm: null
+    margin_db: 10.0
+    limit_source: ''
+    paths:
+    - source: du1
+      source_peak_dbm: null
+      minimum_passive_loss_db: null
+      uncertainty_db: 3.0
+      evidence: ''
+    - source: du0
+      source_peak_dbm: null
+      minimum_passive_loss_db: null
+      uncertainty_db: 3.0
+      evidence: ''
+    - source: ue
+      source_peak_dbm: null
+      minimum_passive_loss_db: null
+      uncertainty_db: 3.0
+      evidence: ''
+  - name: ue
+    max_input_dbm: null
+    margin_db: 10.0
+    limit_source: ''
+    paths:
+    - source: du0
+      source_peak_dbm: null
+      minimum_passive_loss_db: null
+      uncertainty_db: 3.0
+      evidence: ''
+    - source: du1
+      source_peak_dbm: null
+      minimum_passive_loss_db: null
+      uncertainty_db: 3.0
+      evidence: ''

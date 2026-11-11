@@ -1,0 +1,7 @@
+[INFO] [UHD] linux; GNU C++ version 13.3.0; Boost_108300; UHD_4.11.0.HEAD-0-g0d7ed3b1
+[INFO] [X300] X300 initialization sequence...
+[INFO] [X300] Maximum frame size: 1472 bytes.
+[INFO] [GPS] No GPSDO found
+[INFO] [X300] Radio 1x clock: 200 MHz
+[ERROR] [RFNOC::GRAPH] Caught exception while initializing graph: RfnocError: RFNoC protocol mismatch between SW and HW (SW: 2.0, HW: 1.0)
+Error: RuntimeError: Failure to create rfnoc_graph.

@@ -1,0 +1,32 @@
+{
+  "repository": "https://github.com/OPENAIRINTERFACE/openairinterface5g",
+  "commit": "1143f7500e5e5a9cd258148f8429230cc2759554",
+  "describe": "2026.w37 (develop, 2026-09-12); the checkout already built and RFsim-handover-tested on this lab host",
+  "assets": {
+    "cu": {
+      "path": "targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb-cu.sa.f1.conf",
+      "sha256": "f527b07453e95fbdf33a534acf783d12648825a33d050d38d0895c75dd7d5266",
+      "strip_includes": []
+    },
+    "du": {
+      "path": "targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb-du.sa.band78.106prb.rfsim.pci0.conf",
+      "sha256": "907dc3529ab8faafa9f76269b4dd0e4d5f7bb29338d7fb2d170e669763e45c82",
+      "strip_includes": []
+    },
+    "gnb": {
+      "path": "targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.pci0.rfsim.conf",
+      "sha256": "0b8e1264dd5c58ab1a6897a3a894eb92ca3783d12842a273f5bdb621c3cc57f9",
+      "strip_includes": ["neighbour-config-rfsim.conf"]
+    },
+    "phy_n66_25prb": {
+      "path": "targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band66.fr1.25PRB.usrpx300.conf",
+      "sha256": "3ea99391f7911ba89ae36bad1c03f1ff87f4f2c7ee4434e79a56c14bafeabc2b",
+      "strip_includes": ["channelmod_rfsimu_LEO_satellite.conf"]
+    },
+    "phy_n78_24prb": {
+      "path": "targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.24PRB.usrpb210.conf",
+      "sha256": "42b47596af23fcdc41018e042e6d205cb2d606929eba488c26a9d73e6a59271f",
+      "strip_includes": []
+    }
+  }
+}

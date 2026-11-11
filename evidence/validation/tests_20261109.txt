@@ -1,0 +1,113 @@
+test_noise_only_is_not_a_cell (test_calibration.Exp1Tests.test_noise_only_is_not_a_cell) ... ok
+test_pss_detects_identity_and_period (test_calibration.Exp1Tests.test_pss_detects_identity_and_period) ... ok
+test_pss_sequence_is_38211 (test_calibration.Exp1Tests.test_pss_sequence_is_38211) ... ok
+test_receive_only_guard_and_budget (test_calibration.Exp1Tests.test_receive_only_guard_and_budget) ... ok
+test_report_interprets_linear_steps (test_calibration.Exp1Tests.test_report_interprets_linear_steps) ... ok
+test_run_node_refuses_ue_in_experiment1 (test_calibration.Exp1Tests.test_run_node_refuses_ue_in_experiment1) ... ok
+test_tone_level (test_calibration.Exp1Tests.test_tone_level) ... ok
+test_a3_units (test_framework.FrameworkTests.test_a3_units) ... ok
+test_bench_budget_passes_with_assumptions (test_framework.FrameworkTests.test_bench_budget_passes_with_assumptions) ... ok
+test_comparison_rejects_mixed_provenance (test_framework.FrameworkTests.test_comparison_rejects_mixed_provenance) ... ok
+test_dashboard_state_follows_handover (test_framework.FrameworkTests.test_dashboard_state_follows_handover) ... ok
+test_default_hardware_blocked (test_framework.FrameworkTests.test_default_hardware_blocked) ... ok
+test_demo_metrics (test_framework.FrameworkTests.test_demo_metrics) ... ok
+test_duplicate_pci (test_framework.FrameworkTests.test_duplicate_pci) ... ok
+test_extract_events_and_window (test_framework.FrameworkTests.test_extract_events_and_window) ... ok
+test_fractional_gain_rejected (test_framework.FrameworkTests.test_fractional_gain_rejected) ... ok
+test_hardware_nrue_gain_cap (test_framework.FrameworkTests.test_hardware_nrue_gain_cap) ... ok
+test_interlock (test_framework.FrameworkTests.test_interlock) ... ok
+test_iphone_requires_ciphering (test_framework.FrameworkTests.test_iphone_requires_ciphering) ... ok
+test_log_parser_on_real_lines (test_framework.FrameworkTests.test_log_parser_on_real_lines) ... ok
+test_manual_command_matches_pinned_oai (test_framework.FrameworkTests.test_manual_command_matches_pinned_oai) ... ok
+test_manual_measurement_never_matches_a_cell (test_framework.FrameworkTests.test_manual_measurement_never_matches_a_cell) ... ok
+test_missing_leakage_path (test_framework.FrameworkTests.test_missing_leakage_path) ... ok
+test_missing_self_coupling_path (test_framework.FrameworkTests.test_missing_self_coupling_path) ... ok
+test_n2_command (test_framework.FrameworkTests.test_n2_command) ... ok
+test_nan_rejected (test_framework.FrameworkTests.test_nan_rejected) ... ok
+test_no_completion_inferred_from_packets (test_framework.FrameworkTests.test_no_completion_inferred_from_packets) ... ok
+test_no_nrue_a3_claim (test_framework.FrameworkTests.test_no_nrue_a3_claim) ... ok
+test_ota_cap_ceiling (test_framework.FrameworkTests.test_ota_cap_ceiling) ... ok
+test_ota_pmax_ceiling (test_framework.FrameworkTests.test_ota_pmax_ceiling) ... ok
+test_overlapping_ssb_positions (test_framework.FrameworkTests.test_overlapping_ssb_positions) ... ok
+test_ping_probe_loopback (test_framework.FrameworkTests.test_ping_probe_loopback) ... ok
+test_power_addition_and_no_variable_credit (test_framework.FrameworkTests.test_power_addition_and_no_variable_credit) ... ok
+test_profile_frequencies_and_cal (test_framework.FrameworkTests.test_profile_frequencies_and_cal) ... ok
+test_render_bench (test_framework.FrameworkTests.test_render_bench) ... ok
+test_render_every_config_and_manifest (test_framework.FrameworkTests.test_render_every_config_and_manifest) ... ok
+test_render_hardware_nrue (test_framework.FrameworkTests.test_render_hardware_nrue) ... ok
+test_replay_timeline_of_earlier_run (test_framework.FrameworkTests.test_replay_timeline_of_earlier_run) ... ok
+test_rf_model_not_silently_applied_to_hardware (test_framework.FrameworkTests.test_rf_model_not_silently_applied_to_hardware) ... ok
+test_rfsim_role_mapping (test_framework.FrameworkTests.test_rfsim_role_mapping) ... ok
+test_rrc_stats_parser (test_framework.FrameworkTests.test_rrc_stats_parser) ... ok
+test_rx_gain_clipping_rejected (test_framework.FrameworkTests.test_rx_gain_clipping_rejected) ... ok
+test_single_cell_phase (test_framework.FrameworkTests.test_single_cell_phase) ... ok
+test_single_cell_refuses_inactive_node (test_framework.FrameworkTests.test_single_cell_refuses_inactive_node) ... ok
+test_ssb_bitmap_respects_profile_lmax (test_framework.FrameworkTests.test_ssb_bitmap_respects_profile_lmax) ... ok
+test_trace_reproducible (test_framework.FrameworkTests.test_trace_reproducible) ... ok
+test_transport_budget_on_shared_link (test_framework.FrameworkTests.test_transport_budget_on_shared_link) ... ok
+test_ttt_reject_milliseconds_as_enum (test_framework.FrameworkTests.test_ttt_reject_milliseconds_as_enum) ... ok
+test_tx_gain_cap (test_framework.FrameworkTests.test_tx_gain_cap) ... ok
+test_udp_loopback (test_framework.FrameworkTests.test_udp_loopback) ... ok
+test_unknown_radio_field (test_framework.FrameworkTests.test_unknown_radio_field) ... ok
+test_unmatched_attempt_remains_unknown (test_framework.FrameworkTests.test_unmatched_attempt_remains_unknown) ... ok
+test_unsupported_sample_rate (test_framework.FrameworkTests.test_unsupported_sample_rate) ... ok
+test_comparison_rejects_rfsim_and_hardware_mix (test_review_regressions.ReviewRegressions.test_comparison_rejects_rfsim_and_hardware_mix) ... ok
+test_dashboard_accepts_ue_console_lines (test_review_regressions.ReviewRegressions.test_dashboard_accepts_ue_console_lines) ... ok
+test_ethernet_ue_cannot_bypass_transport_budget (test_review_regressions.ReviewRegressions.test_ethernet_ue_cannot_bypass_transport_budget) ... ok
+test_failed_ping_cannot_silently_become_empty_measurement (test_review_regressions.ReviewRegressions.test_failed_ping_cannot_silently_become_empty_measurement) ... ok
+test_inventory_includes_identified_ue (test_review_regressions.ReviewRegressions.test_inventory_includes_identified_ue) ... ok
+test_live_gate_rejects_auto_power_and_placeholder_evidence (test_review_regressions.ReviewRegressions.test_live_gate_rejects_auto_power_and_placeholder_evidence) ... ok
+test_local_session_ip_is_rejected (test_review_regressions.ReviewRegressions.test_local_session_ip_is_rejected) ... ok
+test_missing_window_is_not_zero_loss (test_review_regressions.ReviewRegressions.test_missing_window_is_not_zero_loss) ... ok
+test_n2_needs_identity_mapping_before_event_pairing (test_review_regressions.ReviewRegressions.test_n2_needs_identity_mapping_before_event_pairing) ... ok
+test_overlapping_windows_do_not_double_count_lost_probe (test_review_regressions.ReviewRegressions.test_overlapping_windows_do_not_double_count_lost_probe) ... ok
+test_partial_window_is_excluded_from_aggregate (test_review_regressions.ReviewRegressions.test_partial_window_is_excluded_from_aggregate) ... ok
+test_rollback_is_a_failure_in_events_and_dashboard (test_review_regressions.ReviewRegressions.test_rollback_is_a_failure_in_events_and_dashboard) ... ok
+test_route_record_does_not_claim_rf_verification (test_review_regressions.ReviewRegressions.test_route_record_does_not_claim_rf_verification) ... ok
+test_timestamp_basis_change_rejects_signaling_duration (test_review_regressions.ReviewRegressions.test_timestamp_basis_change_rejects_signaling_duration) ... ok
+test_config_profile_follows_dl_center (test_session.CarrierShift.test_config_profile_follows_dl_center) ... ok
+test_n66_shift_keeps_duplex_spacing (test_session.CarrierShift.test_n66_shift_keeps_duplex_spacing) ... ok
+test_n78_shift_keeps_offsets_and_raster (test_session.CarrierShift.test_n78_shift_keeps_offsets_and_raster) ... ok
+test_refuses_off_raster_and_out_of_band (test_session.CarrierShift.test_refuses_off_raster_and_out_of_band) ... ok
+test_render_applies_shift_everywhere (test_session.CarrierShift.test_render_applies_shift_everywhere) ... ok
+test_carrier_outside_block_refused (test_session.LicenceGate.test_carrier_outside_block_refused) ... ok
+test_eirp_bound_against_licence_limit (test_session.LicenceGate.test_eirp_bound_against_licence_limit) ... ok
+test_ota_budget_passes_only_with_separated_rx2_antennas (test_session.LicenceGate.test_ota_budget_passes_only_with_separated_rx2_antennas) ... ok
+test_ota_live_needs_licence_and_passes_when_filled (test_session.LicenceGate.test_ota_live_needs_licence_and_passes_when_filled) ... ok
+test_compare_mixed_modes_only_when_asked (test_session.ReplayAndCompare.test_compare_mixed_modes_only_when_asked) ... ok
+test_replay_keeps_recorded_order_and_kinds (test_session.ReplayAndCompare.test_replay_keeps_recorded_order_and_kinds) ... ok
+test_findings_language (test_session.SessionPlanning.test_findings_language) ... ok
+test_plan_orders_nodes_and_gates (test_session.SessionPlanning.test_plan_orders_nodes_and_gates) ... ok
+test_schedule (test_session.SessionPlanning.test_schedule) ... ok
+test_set_overrides (test_session.SessionPlanning.test_set_overrides) ... ok
+test_analyze_cli_accepts_saved_config_without_set_option (test_unified.UnifiedWorkflow.test_analyze_cli_accepts_saved_config_without_set_option) ... ok
+test_clock_preview_checks_ue_reference_without_pps_or_inactive_du (test_unified.UnifiedWorkflow.test_clock_preview_checks_ue_reference_without_pps_or_inactive_du) ... ok
+test_complete_process_without_full_probe_span_is_not_a_pass (test_unified.UnifiedWorkflow.test_complete_process_without_full_probe_span_is_not_a_pass) ... ok
+test_core_cleanup_targets_only_explicit_owned_names (test_unified.UnifiedWorkflow.test_core_cleanup_targets_only_explicit_owned_names) ... ok
+test_csv_preserves_packets_and_handover_metrics (test_unified.UnifiedWorkflow.test_csv_preserves_packets_and_handover_metrics) ... ok
+test_current_inventory_and_low_gain (test_unified.UnifiedWorkflow.test_current_inventory_and_low_gain) ... ok
+test_du0_ue_du1_order_and_single_cell_trigger_rejection (test_unified.UnifiedWorkflow.test_du0_ue_du1_order_and_single_cell_trigger_rejection) ... ok
+test_eirp_keeps_antenna_gain_when_geometry_is_replaced (test_unified.UnifiedWorkflow.test_eirp_keeps_antenna_gain_when_geometry_is_replaced) ... ok
+test_failed_probe_and_rejected_trigger_cannot_pass (test_unified.UnifiedWorkflow.test_failed_probe_and_rejected_trigger_cannot_pass) ... ok
+test_monitor_preview_does_not_open_hardware_and_carries_numerology (test_unified.UnifiedWorkflow.test_monitor_preview_does_not_open_hardware_and_carries_numerology) ... ok
+test_nominal_channel_must_fit_not_only_resource_grid (test_unified.UnifiedWorkflow.test_nominal_channel_must_fit_not_only_resource_grid) ... ok
+test_power_envelope_rejects_gain_or_frequency_outside_calibration (test_unified.UnifiedWorkflow.test_power_envelope_rejects_gain_or_frequency_outside_calibration) ... ok
+test_pss_detection_works_with_30khz_spacing (test_unified.UnifiedWorkflow.test_pss_detection_works_with_30khz_spacing) ... ok
+test_radio_csv_distinguishes_dbfs_from_dbm (test_unified.UnifiedWorkflow.test_radio_csv_distinguishes_dbfs_from_dbm) ... ok
+test_receive_check_active_cell_and_ue_full_sample_rate (test_unified.UnifiedWorkflow.test_receive_check_active_cell_and_ue_full_sample_rate) ... ok
+test_rfsim_cli_override_precedes_hardware_transport_validation (test_unified.UnifiedWorkflow.test_rfsim_cli_override_precedes_hardware_transport_validation) ... ok
+test_rfsim_does_not_need_physical_licence_for_simulated_frequency (test_unified.UnifiedWorkflow.test_rfsim_does_not_need_physical_licence_for_simulated_frequency) ... ok
+test_startup_failure_still_writes_summary_csv_and_png (test_unified.UnifiedWorkflow.test_startup_failure_still_writes_summary_csv_and_png) ... 22:54:03 session lab_n78: rfsim n78_24prb_30khz DL 3604.8 MHz, cells ['du0'], 10 s, triggers at manual only
+22:54:03 ABORT: injected core failure
+22:54:03 stopping: probe, UE, DUs, CU
+22:54:03 core: stopped 0 containers started by this session; existing containers preserved
+22:54:03 summary: /tmp/tmpjspczlgy/run/summary.md
+  FAIL  UE attached: no PDU session: see ue.console (cell search / RACH / registration) and cu.console
+  FAIL  Traffic through the radio link: no usable probe records; see probe.console and session.jsonl
+  FAIL  Run ended cleanly: injected core failure
+ok
+
+----------------------------------------------------------------------
+Ran 100 tests in 9.780s
+
+OK

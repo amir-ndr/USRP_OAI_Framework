@@ -1,0 +1,13 @@
+seed: 2026
+repetitions: 5
+axes:
+  handover.offset_db:
+  - 2.0
+  - 4.0
+  handover.hysteresis_db:
+  - 0.5
+  - 2.0
+  handover.ttt_ms:
+  - 40
+  - 160
+  - 320

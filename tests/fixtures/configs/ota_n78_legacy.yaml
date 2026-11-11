@@ -1,0 +1,207 @@
+# EXPERIMENT 2 - over-the-air manual F1 handover, three X310s with antennas, band n78 (licensed block).
+#   X310 A = cell du0 (PCI 0)   X310 B = cell du1 (PCI 1)   X310 C = OAI UE (nr-uesoftmodem)
+# One CU + two DUs on this host; the CU moves the UE between the DUs on command (`ci trigger_f1_ho`).
+# Same file for the RFsim rehearsal:   oaiho session THIS_FILE --set mode=rfsim ...
+# Guide: experiments/exp2_ota_handover/README.md.  Every TODO below is yours to fill before going live.
+schema_version: 2
+mode: hardware
+topology: f1
+experiment:
+  name: exp2_ota_handover
+  active_cells: [du0, du1]           # stage 1 runs override this with --cells du0 (or du1)
+  repetition: 0
+  seed: 1
+paths:
+  oai_root: /home/amirndr/openairinterface5g
+  nr_softmodem: /home/amirndr/openairinterface5g/cmake_targets/ran_build/build/nr-softmodem
+  nr_uesoftmodem: /home/amirndr/openairinterface5g/cmake_targets/ran_build/build/nr-uesoftmodem
+  ue_uicc_config: /home/amirndr/nrue.uicc.conf
+  uhd_prefix: /usr/local             # UHD 4.11 (matches the radios' FPGA images); ignore the apt 4.6 copy
+  core_dir: /home/amirndr/oai-cn5g   # docker compose folder of the 5G core (oaiho session starts it)
+host:
+  links:
+    # n78 10 MHz = 15.36 MS/s = ~521 Mbit/s per direction per X310: ONE radio per 1 GbE link.
+    # Rename nic_ue / nic_du1 to the real interface names (`ip -br link`) after plugging the adapters in,
+    # and run scripts/usrp_dedicated_link.sh for each. With a multi-gig switch instead, see README "Links".
+    enx00e04c680014: {mbps: 1000, max_utilization: 0.7}   # X310 A (du0) + OctoClock, existing USB 5GbE adapter
+    nic_ue: {mbps: 1000, max_utilization: 0.7}            # TODO: second USB adapter -> X310 C (UE)
+    nic_du1: {mbps: 1000, max_utilization: 0.7}           # TODO: third link -> X310 B (du1); only stage 2 needs it
+clock:
+  octoclock_ip: 192.168.10.3
+plmn:                                # must match ~/oai-cn5g/conf/config.yaml and the SIM
+  mcc: '001'
+  mnc: '01'
+  tac: 1
+  sst: 1
+  sd: null
+core:
+  amf_ip: 192.168.70.132
+cu:
+  gnb_id: 3584
+  f1_ip: 127.0.0.3
+  n2_ip: 192.168.70.129/24           # this host's address on the oai-cn5g docker bridge
+  n3_ip: 192.168.70.129/24
+  telnet_ip: 127.0.0.2
+  telnet_port: 9090
+radio:
+  # 10 MHz TDD, 30 kHz SCS, 24 PRB (OAI's band-78 24-PRB template), 5 ms DL/UL pattern, SSB every 20 ms.
+  # Template carrier 3604.8 MHz. TODO: set dl_center_mhz inside your licensed block; it moves in 1.44 MHz
+  # sync-raster steps (validate prints the nearest valid values). The 10 MHz channel occupies +-4.32 MHz.
+  profile: n78_24prb_30khz
+  dl_center_mhz: null
+  clock_source: external
+  time_source: external              # both cells take PPS from the OctoClock: TDD frames aligned
+  continuous_tx: false
+  prach_target_dbm: null             # template value (-96 dBm)
+security:                            # AS algorithms the CU offers; the first one the UE supports wins
+  ciphering: [nea0]
+  integrity: [nia2, nia0]
+  drb_ciphering: true
+  drb_integrity: false
+ue:
+  kind: oai_nrue                     # later: iphone (docs/UE_SETUP.md) - then periodic_reports: true
+ue_radio:                            # X310 C, driven by nr-uesoftmodem (verified 2026-11-09)
+  usrp_args: type=x300,addr=192.168.10.5,serial=34AF675
+  usrp_link: nic_ue
+  daughterboard: UBX-160 v2          # slot B, FPGA 39.3 / HG
+  subdev: B:0
+  tx_gain_max_db: 31.5
+  tx_atten_db: 31                    # --ue-txgain is ATTENUATION: UHD TX gain 0.5 dB (OAI default 0 = FULL power)
+  rx_gain: 105                       # --ue-rxgain (OAI units): 105 - 77 (X310 cal at 3.5 GHz) = 28 dB UHD
+  clock_source: external             # 10 MHz from the OctoClock; the UE takes timing from the cell
+handover:
+  trigger: manual                    # CU command; A3 (measurement-driven) comes later with a phone
+  periodic_reports: false
+  offset_db: 3.0
+  hysteresis_db: 1.0
+  ttt_ms: 160
+cells:
+- name: du0
+  pci: 0
+  nr_cellid: 12345678
+  du_id: 3584
+  gnb_id: 3584
+  f1_ip: 127.0.0.4
+  n2_ip: 192.168.70.129/24
+  n3_ip: 192.168.70.129/24
+  ssb_bitmap: 1                      # SSB index 0
+  usrp_ip: 192.168.10.2
+  usrp_link: enx00e04c680014
+  serial: 34BA717
+  daughterboard: UBX-160 v2
+  subdev: B:0                        # UBX-160 v2 in slot B
+  att_tx_db: 31                      # UHD TX gain 0.5 dB. Raise power only in 3 dB steps (28, 25), cap 6 dB.
+  att_rx_db: 0
+  max_rxgain: 105                    # UHD RX gain 105 - 0 - 77 (X310 cal at 3.5 GHz) = 28 dB
+  tx_gain_min_db: 0.0
+  tx_gain_max_db: 31.5
+  rx_gain_min_db: 0.0
+  rx_gain_max_db: 31.5
+  telnet_ip: 127.0.0.4
+  telnet_port: 9090
+- name: du1
+  pci: 1
+  nr_cellid: 11111111
+  du_id: 3585
+  gnb_id: 3585
+  f1_ip: 127.0.0.5
+  n2_ip: 192.168.70.129/24
+  n3_ip: 192.168.70.129/24
+  ssb_bitmap: 2                      # SSB index 1: different symbols from du0
+  usrp_ip: 192.168.20.6
+  usrp_link: nic_du1
+  serial: 34BA72C
+  daughterboard: UBX-160 v2
+  subdev: B:0
+  att_tx_db: 31
+  att_rx_db: 0
+  max_rxgain: 105
+  tx_gain_min_db: 0.0
+  tx_gain_max_db: 31.5
+  rx_gain_min_db: 0.0
+  rx_gain_max_db: 31.5
+  telnet_ip: 127.0.0.5
+  telnet_port: 9090
+rfsim:
+  ue_server_ip: 127.0.0.1
+  port: 4043
+rfsim_channel:
+  enabled: false
+  model: AWGN
+  ploss_db: 0.0
+  noise_power_db: -80.0
+  forgetfact: 0.0
+  offset_samples: 0
+  ds_tdl: 0.03
+attenuator:
+  adapter_argv: []
+  readback_qualified: false
+  min_db: 0
+  max_db: 60
+  safe_db: 60
+  minimum_interval_s: 1.0
+  maximum_lateness_s: 0.5
+  timeout_s: 3.0
+safety:
+  rf_setup: ota                      # antennas, no RF cables between radios
+  max_uhd_tx_gain_db: 6.0            # hard cap: validate/render refuse more; the interlock stops a radio reporting more
+  ue_pmax_dbm: 0                     # broadcast p-Max (SIB1)
+  licence:                           # TODO: copy from your licence; the live gate refuses an OTA run without it
+    id: ''                           # licence / authorization number
+    blocks_mhz: []                   # e.g. [[3550.0, 3600.0]]: the 10 MHz carrier must lie fully inside a block
+    max_eirp_dbm: null               # licence power limit; checked against the worst-case peak EIRP bound
+  # Set each flag to true ONLY after the check in experiments/exp2_ota_handover/README.md step 3.
+  rf_path_reviewed: false            # antennas placed as in the README drawing, distances measured
+  spectrum_authorized: false         # licence covers this carrier, power and location
+  clock_and_pps_verified: true       # oaiho clock-check --execute passed 2026-11-09 (A, B locked, same PPS epoch)
+  host_time_synchronized: false      # timedatectl: "System clock synchronized: yes"
+  single_cell_attach_verified: false # stage 1 passed on du0 AND on du1 (needed before any handover trigger)
+  gain_mapping_verified: false       # `oaiho gains` shows UHD TX gain 0.5 dB, RX 28 dB for all three radios
+  evidence_note: ''                  # TODO: where photos / distances / licence copy are kept
+  receivers:
+  # Peak bound of every transmitter: UBX +20 dBm at full gain (31.5 dB) reduced to the 6 dB cap = -5.5 dBm.
+  # This credits the software cap (validate/render refuse more; the run-node interlock stops a radio that
+  # reports more), so never start OAI by hand on this bench. Free-space loss with <= 3 dBi antennas (VERT2450
+  # is 3 dBi in its 2.4 GHz band, less at 3.6 GHz). Distances are minimums: measure them.
+  - name: du0
+    max_input_dbm: -15.0
+    margin_db: 10.0
+    limit_source: Ettus UBX maximum RF input -15 dBm (kb.ettus.com/UBX)
+    paths:
+    - {source: du0, source_peak_dbm: -5.5, uncertainty_db: 3.0,
+       ota: {distance_m: 0.5, tx_antenna_gain_dbi: 3.0, rx_antenna_gain_dbi: 3.0},
+       evidence: 'TODO operator: X310 A RX2 antenna on an SMA extension cable, >= 0.5 m from its own TX/RX antenna'}
+    - {source: du1, source_peak_dbm: -5.5, uncertainty_db: 3.0,
+       ota: {distance_m: 2.0, tx_antenna_gain_dbi: 3.0, rx_antenna_gain_dbi: 3.0},
+       evidence: 'TODO operator: X310 B antennas >= 2 m from X310 A antennas'}
+    - {source: ue, source_peak_dbm: -5.5, uncertainty_db: 3.0,
+       ota: {distance_m: 1.0, tx_antenna_gain_dbi: 3.0, rx_antenna_gain_dbi: 3.0},
+       evidence: 'TODO operator: X310 C (UE) antennas >= 1 m from X310 A antennas; UE TX gain capped at 6 dB'}
+  - name: du1
+    max_input_dbm: -15.0
+    margin_db: 10.0
+    limit_source: Ettus UBX maximum RF input -15 dBm (kb.ettus.com/UBX)
+    paths:
+    - {source: du1, source_peak_dbm: -5.5, uncertainty_db: 3.0,
+       ota: {distance_m: 0.5, tx_antenna_gain_dbi: 3.0, rx_antenna_gain_dbi: 3.0},
+       evidence: 'TODO operator: X310 B RX2 antenna on an SMA extension cable, >= 0.5 m from its own TX/RX antenna'}
+    - {source: du0, source_peak_dbm: -5.5, uncertainty_db: 3.0,
+       ota: {distance_m: 2.0, tx_antenna_gain_dbi: 3.0, rx_antenna_gain_dbi: 3.0},
+       evidence: 'TODO operator: X310 A antennas >= 2 m from X310 B antennas'}
+    - {source: ue, source_peak_dbm: -5.5, uncertainty_db: 3.0,
+       ota: {distance_m: 1.0, tx_antenna_gain_dbi: 3.0, rx_antenna_gain_dbi: 3.0},
+       evidence: 'TODO operator: X310 C (UE) antennas >= 1 m from X310 B antennas'}
+  - name: ue
+    max_input_dbm: -15.0
+    margin_db: 10.0
+    limit_source: Ettus UBX maximum RF input -15 dBm (kb.ettus.com/UBX); X310 C has a UBX-160 v2
+    paths:
+    - {source: ue, source_peak_dbm: -5.5, uncertainty_db: 3.0,
+       ota: {distance_m: 0.5, tx_antenna_gain_dbi: 3.0, rx_antenna_gain_dbi: 3.0},
+       evidence: 'TODO operator: X310 C RX2 antenna on an SMA extension cable, >= 0.5 m from its own TX/RX antenna'}
+    - {source: du0, source_peak_dbm: -5.5, uncertainty_db: 3.0,
+       ota: {distance_m: 1.0, tx_antenna_gain_dbi: 3.0, rx_antenna_gain_dbi: 3.0},
+       evidence: 'TODO operator: X310 A antennas >= 1 m from X310 C antennas'}
+    - {source: du1, source_peak_dbm: -5.5, uncertainty_db: 3.0,
+       ota: {distance_m: 1.0, tx_antenna_gain_dbi: 3.0, rx_antenna_gain_dbi: 3.0},
+       evidence: 'TODO operator: X310 B antennas >= 1 m from X310 C antennas'}

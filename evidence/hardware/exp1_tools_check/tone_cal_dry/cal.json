@@ -1,0 +1,40 @@
+{
+  "tx_args": "type=x300,addr=192.168.10.2,serial=34BA717",
+  "freq_hz": 2152680000.0,
+  "tone_offset_hz": 210000.0,
+  "amplitude_dbfs": -20.0,
+  "tx_gain_readback_db": 0.0,
+  "tx_gain_range_db": [
+    0.0,
+    31.5
+  ],
+  "rx_gain_db": 20.0,
+  "nominal_tx_dbm": -31.5,
+  "ref_locked": {
+    "self": true,
+    "ue": true
+  },
+  "dry_run": true,
+  "receivers": {
+    "self": {
+      "baseline_tone_bin_dbfs": -109.84,
+      "baseline_floor_dbfs": -111.58
+    },
+    "ue": {
+      "baseline_tone_bin_dbfs": -110.08,
+      "baseline_floor_dbfs": -111.52
+    }
+  },
+  "plan": {
+    "transmitter": "du0",
+    "tx_gain_db": 0,
+    "tone_dbfs": -20,
+    "nominal_connector_dbm": -31.5,
+    "seconds": 2,
+    "listeners": [
+      "du0 RX2",
+      "ue RX2"
+    ],
+    "transmits": false
+  }
+}

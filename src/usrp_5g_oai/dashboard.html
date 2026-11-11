@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handover Bench</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --wash: rgba(11,11,11,0.05);
+  --s1: #2a78d6; --s2: #eb6834;
+  --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.06);
+    --s1: #3987e5; --s2: #d95926;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.06);
+  --s1: #3987e5; --s2: #d95926;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 1280px; margin: 0 auto; padding: 16px; padding-block: 16px 40px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+h1 { font-size: 20px; margin: 0; font-weight: 600; }
+h2 { font-size: 15px; margin: 0 0 8px; font-weight: 600; }
+.sub { color: var(--ink-2); font-size: 13px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.banner { margin: 10px 0 0; padding: 8px 12px; border-radius: 8px; background: var(--wash); color: var(--ink-2); font-size: 13px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--border);
+        font-size: 12px; color: var(--ink); white-space: nowrap; }
+.icon { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex: none; }
+.icon.good { background: var(--good); } .icon.warning { background: var(--warning); }
+.icon.serious { background: var(--serious); } .icon.critical { background: var(--critical); border-radius: 1px; }
+.icon.off { background: transparent; border: 1.5px solid var(--muted); }
+.key { display: inline-block; width: 16px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.k1 { background: var(--s1); } .k2 { background: var(--s2); }
+.row { display: grid; gap: 16px; margin-top: 16px; }
+.cells { grid-template-columns: 1fr; }
+@media (min-width: 900px) { .cells { grid-template-columns: 1fr 1fr; } }
+.charts { grid-template-columns: 1fr; }
+@media (min-width: 1000px) { .charts { grid-template-columns: 1fr 1fr; } }
+.cell-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.cell-title { font-weight: 600; font-size: 15px; }
+.cell-sub { color: var(--ink-2); font-size: 12px; margin: 2px 0 10px; }
+dl.kv { display: grid; grid-template-columns: max-content 1fr; gap: 3px 14px; margin: 0; font-size: 13px; }
+dl.kv dt { color: var(--ink-2); } dl.kv dd { margin: 0; font-variant-numeric: tabular-nums; }
+.section-label { grid-column: 1 / -1; margin-top: 8px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+#topo { width: 100%; height: auto; display: block; }
+.topo-foot { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; margin-top: 6px; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-top: 18px; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: transparent; color: var(--ink-2); padding: 4px 10px; font: inherit; font-size: 12px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--wash); color: var(--ink); font-weight: 600; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--ink-2); }
+figure { margin: 0; }
+figcaption { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+.cap-sub { color: var(--ink-2); font-size: 12px; font-weight: 400; }
+.chart-wrap { position: relative; }
+.chart-wrap svg { width: 100%; height: 210px; display: block; overflow: visible; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+       padding: 6px 9px; font-size: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.12); min-width: 120px; z-index: 2; }
+.tip .t { color: var(--muted); margin-bottom: 2px; } .tip .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+.empty { color: var(--muted); font-size: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 5px 10px; border-bottom: 1px solid var(--grid); }
+th { color: var(--ink-2); font-weight: 600; font-size: 12px; }
+.scroll { overflow-x: auto; }
+ol.feed { list-style: none; margin: 0; padding: 0; max-height: 300px; overflow-y: auto; font-size: 13px; }
+ol.feed li { display: grid; grid-template-columns: 96px 16px 76px 1fr; gap: 8px; padding: 3px 0; border-bottom: 1px solid var(--grid); align-items: baseline; }
+ol.feed .ts { color: var(--muted); font-variant-numeric: tabular-nums; } ol.feed .node { color: var(--ink-2); }
+button.primary { font: inherit; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--wash); color: var(--ink); cursor: pointer; }
+button.primary:disabled { opacity: .5; cursor: default; }
+#trigResult { font-size: 12px; color: var(--ink-2); }
+@keyframes flow { to { stroke-dashoffset: -40; } }
+.flowing { stroke-dasharray: 4 16; animation: flow 1s linear infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+.pulsing { animation: pulse 1s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .flowing, .pulsing { animation: none; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Handover bench</h1>
+      <div class="sub" id="subtitle">waiting for data…</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span class="chip" id="conn"><span class="icon off"></span>connecting</span>
+      <span class="sub" id="clock"></span>
+    </div>
+  </header>
+  <div class="banner" id="banner" hidden></div>
+
+  <section class="card" style="margin-top:16px" aria-label="Radio topology">
+    <svg id="topo" viewBox="0 0 1000 200" role="img" aria-label="Two X310 cells and the UE; the coloured link is the serving cell"></svg>
+    <div class="topo-foot">
+      <div id="hoStatus" class="chip"><span class="icon off"></span>no handover in progress</div>
+      <div id="trigBox" hidden>
+        <button class="primary" id="trigBtn">Trigger handover…</button>
+        <span id="trigConfirm" hidden> Send <code id="trigCmd"></code> to the CU?
+          <button class="primary" id="trigYes">Confirm</button> <button class="primary" id="trigNo">Cancel</button></span>
+        <span id="trigResult"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="row cells" id="cells" aria-label="USRP cells"></section>
+  <section class="card" id="rxcard" style="margin-top:16px" hidden aria-label="Measurement receiver">
+    <h2>Measurement receiver (UE radio, receive-only)</h2>
+    <dl class="kv" id="rxkv"></dl>
+    <div class="chart-wrap" id="ch-rx" style="margin-top:10px"></div>
+    <p class="sub" style="margin:6px 0 0">SSB burst level (line) and idle floor at the UE radio, dBFS; the gap between them is the cell's margin over noise.</p>
+  </section>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Time window">
+      <button data-w="60">1 min</button><button data-w="120" aria-pressed="true">2 min</button><button data-w="300">5 min</button><button data-w="600">10 min</button>
+    </div>
+    <div class="legend" id="legend"></div>
+  </div>
+  <section class="row charts">
+    <figure class="card"><figcaption>Signal strength reported by the UE <span class="cap-sub" id="rsrpSrc">SS-RSRP per cell, dBm</span></figcaption>
+      <div class="chart-wrap" id="ch-rsrp"></div></figure>
+    <figure class="card"><figcaption>Downlink data per cell <span class="cap-sub">MAC goodput, Mbit/s · shows which USRP carries the traffic</span></figcaption>
+      <div class="chart-wrap" id="ch-dl"></div></figure>
+    <figure class="card"><figcaption>Uplink quality at each DU <span class="cap-sub">PUSCH SNR, dB</span></figcaption>
+      <div class="chart-wrap" id="ch-snr"></div></figure>
+    <figure class="card"><figcaption>Uplink receive level at each X310 <span class="cap-sub">PUSCH RSSI, dBFS · line at -12 dBFS = OFDM clipping risk</span></figcaption>
+      <div class="chart-wrap" id="ch-rssi"></div></figure>
+    <figure class="card"><figcaption>Probe round-trip time <span class="cap-sub">ms, 100 ms bins · <span class="icon critical"></span> lost probe</span></figcaption>
+      <div class="chart-wrap" id="ch-rtt"></div></figure>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Handovers</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>#</th><th>UE</th><th>trigger</th><th>from → to</th><th>started</th><th>decision → command (ms)</th><th>command → complete (ms)</th><th>total (ms)</th><th>outcome</th></tr></thead>
+      <tbody id="hoRows"><tr><td colspan="9" class="empty">none yet</td></tr></tbody>
+    </table></div>
+    <p class="sub" style="margin:8px 0 0">Times come from OAI's own log timestamps on this host. "Complete" means the CU logged <code>handover … complete!</code> after the UE's RRCReconfigurationComplete arrived on the target cell.</p>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Event log</h2>
+    <ol class="feed" id="feed"></ol>
+  </section>
+</main>
+<script>
+"use strict";
+const STATUS = {
+  inactive: ['off', 'inactive for this run'], offline: ['off', 'offline'], starting: ['warning', 'starting'], radio_config: ['warning', 'radio configuring'],
+  radio_verified: ['good', 'radio verified'], f1_connected: ['good', 'cell up (F1)'], serving: ['good', 'serving the UE']
+};
+let WINDOW = 120, last = null;
+const $ = id => document.getElementById(id);
+const el = (tag, attrs = {}, text) => { const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); if (text != null) e.textContent = text; return e; };
+const svgEl = (tag, attrs = {}) => { const e = document.createElementNS('http://www.w3.org/2000/svg', tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const fmtT = t => new Date(t * 1000).toLocaleTimeString([], {hour12: false}) + '.' + String(Math.floor((t % 1) * 1000)).padStart(3, '0');
+const fmtClock = t => new Date(t * 1000).toLocaleTimeString([], {hour12: false});
+const num = (v, d = 1) => v == null || Number.isNaN(v) ? '—' : Number(v).toFixed(d);
+const chip = (level, text) => { const c = el('span', {class: 'chip'}); c.append(el('span', {class: 'icon ' + level}), document.createTextNode(text)); return c; };
+const seriesVar = slot => slot === 1 ? '--s1' : '--s2';
+
+document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  WINDOW = Number(b.dataset.w); if (last) render(last);
+}));
+
+// ------------------------------------------------------------------ topology
+function drawTopo(s) {
+  const svg = $('topo'); svg.replaceChildren();
+  const [a, b] = s.cells, ink = css('--ink'), ink2 = css('--ink-2'), muted = css('--muted'), surf = css('--surface');
+  const ho = s.handovers.find(h => h.outcome === 'in progress');
+  const pos = [{x: 150, cell: a}, {x: 850, cell: b}], ue = {x: 500, y: 110};
+  for (const p of pos) {
+    const c = p.cell, color = css(seriesVar(c.slot)), on = !['offline', 'inactive'].includes(c.status) && !c.interlock;
+    const serving = s.ue.serving === c.name, target = ho && ho.target === c.name;
+    const line = svgEl('line', {x1: p.x + (p.x < 500 ? 95 : -95), y1: 110, x2: ue.x + (p.x < 500 ? -26 : 26), y2: ue.y,
+      stroke: serving || target ? color : muted, 'stroke-width': serving ? 3 : (target ? 2.5 : 1), 'stroke-linecap': 'round', opacity: on ? 1 : 0.25});
+    if (serving && on) line.classList.add('flowing');
+    if (target) line.classList.add('pulsing');
+    svg.append(line);
+    if (serving && on) svg.append(svgEl('line', {x1: line.getAttribute('x1'), y1: 110, x2: line.getAttribute('x2'), y2: 110, stroke: color, 'stroke-width': 1, opacity: 0.35}));
+    const g = svgEl('g', {opacity: on ? 1 : 0.45});
+    g.append(svgEl('rect', {x: p.x - 95, y: 62, width: 190, height: 96, rx: 10, fill: surf, stroke: serving ? color : css('--axis'), 'stroke-width': serving ? 2 : 1}));
+    const label = svgEl('text', {x: p.x, y: 92, 'text-anchor': 'middle', 'font-size': 16, 'font-weight': 600, fill: ink}); label.textContent = `X310 · ${c.name}`;
+    const sub = svgEl('text', {x: p.x, y: 114, 'text-anchor': 'middle', 'font-size': 13, fill: ink2}); sub.textContent = `PCI ${c.pci} · ${c.usrp_ip}`;
+    const st = svgEl('text', {x: p.x, y: 138, 'text-anchor': 'middle', 'font-size': 12, fill: ink2});
+    st.textContent = c.interlock ? 'INTERLOCK — radio stopped' : (STATUS[c.status] || ['', c.status])[1];
+    g.append(label, sub, st, svgEl('rect', {x: p.x - 60, y: 66, width: 120, height: 4, rx: 2, fill: color}));
+    // antenna with radiating arcs while the cell is up
+    g.append(svgEl('line', {x1: p.x, y1: 62, x2: p.x, y2: 30, stroke: ink2, 'stroke-width': 2}));
+    if (on && ['radio_verified', 'f1_connected', 'serving'].includes(c.status))
+      for (const r of [10, 18]) g.append(svgEl('path', {d: `M ${p.x - r} ${30 - r * 0.6} A ${r} ${r} 0 0 1 ${p.x + r} ${30 - r * 0.6}`, fill: 'none', stroke: color, 'stroke-width': 1.5, class: 'pulsing'}));
+    svg.append(g);
+  }
+  const phone = svgEl('g');
+  phone.append(svgEl('rect', {x: ue.x - 22, y: ue.y - 40, width: 44, height: 80, rx: 9, fill: surf, stroke: ink, 'stroke-width': 1.5}));
+  phone.append(svgEl('rect', {x: ue.x - 8, y: ue.y - 34, width: 16, height: 3, rx: 1.5, fill: muted}));
+  const t1 = svgEl('text', {x: ue.x, y: ue.y + 62, 'text-anchor': 'middle', 'font-size': 14, 'font-weight': 600, fill: ink});
+  t1.textContent = s.ue.ue_id != null ? `UE ${s.ue.ue_id}` : 'UE (not attached)';
+  const t2 = svgEl('text', {x: ue.x, y: ue.y + 80, 'text-anchor': 'middle', 'font-size': 12, fill: ink2});
+  const ur = s.ue.radio ? ` · TX gain ${num(Number(s.ue.radio.tx_gain))} dB` : '';
+  t2.textContent = (s.ue.rnti ? `RNTI ${s.ue.rnti} · ` : '') + s.meta.ue_kind.replace('_', ' ') + ur;
+  phone.append(t1, t2); svg.append(phone);
+  const hs = $('hoStatus'); hs.replaceChildren();
+  if (ho) hs.append(el('span', {class: 'icon warning'}), document.createTextNode(`handover #${ho.id} in progress (${ho.kind}): ${ho.source} → ${ho.target}`));
+  else if (s.handovers.length) { const h = s.handovers[s.handovers.length - 1];
+    hs.append(el('span', {class: 'icon ' + (h.outcome === 'complete' ? 'good' : 'critical')}), document.createTextNode(`last handover #${h.id}: ${h.outcome}` + (h.t_complete ? ` in ${num((h.t_complete - h.t_trigger) * 1e3, 0)} ms` : ''))); }
+  else hs.append(el('span', {class: 'icon off'}), document.createTextNode('no handover yet'));
+}
+
+// ------------------------------------------------------------------ cell cards
+function cellCard(c, s) {
+  const card = el('article', {class: 'card'}), head = el('div', {class: 'cell-head'});
+  const title = el('div', {class: 'cell-title'}); title.append(el('span', {class: 'key ' + (c.slot === 1 ? 'k1' : 'k2')}), document.createTextNode(`${c.name} · PCI ${c.pci} · DU ${c.du_id}`));
+  const [lvl, txt] = c.interlock ? ['critical', 'interlock tripped'] : (STATUS[c.status] || ['off', c.status]);
+  head.append(title, chip(lvl, txt));
+  card.append(head, el('div', {class: 'cell-sub'}, `X310 ${c.usrp_ip} · ${c.daughterboard || ''}`));
+  const dl = el('dl', {class: 'kv'}), hw = c.hw, u = c.ue && !c.ue_stale ? c.ue : null;
+  const add = (k, v) => { dl.append(el('dt', {}, k), el('dd', {}, v)); };
+  dl.append(el('div', {class: 'section-label'}, 'radio (as reported by OAI/UHD)'));
+  add('TX gain', hw.tx_gain != null ? `${num(hw.tx_gain)} dB (expected ${num(c.expected_tx_gain_db)}, cap ${num(s.meta.tx_gain_cap_db)})` : `— (expected ${num(c.expected_tx_gain_db)} dB)`);
+  add('RX gain', hw.rx_gain != null ? `${num(hw.rx_gain)} dB (expected ${num(c.expected_rx_gain_db)})` : `— (expected ${num(c.expected_rx_gain_db)} dB)`);
+  add('TX / RX freq', hw.tx_freq ? `${num(hw.tx_freq * 1e3, 3)} / ${num(hw.rx_freq * 1e3, 3)} MHz` : `— (${s.meta.dl_mhz} / ${s.meta.ul_mhz} MHz)`);
+  add('Sample rate', hw.tx_rate ? `${num(hw.tx_rate, 2)} MS/s · master clock ${num(hw.master_clock, 2)} MHz` : `— (${s.meta.sample_rate_msps} MS/s)`);
+  add('Reference', hw.clock_source ? `${hw.clock_source} 10 MHz / ${hw.time_source} PPS` + (hw.ext_locked === true ? ' · locked' : hw.ext_locked === false ? ' · NOT locked' : '') : '—');
+  add('UHD stream', `TX underflow ${c.uhd.U} · TX late ${c.uhd.L} · RX overflow ${c.uhd.O} · RX dropped ${c.uhd.D || 0} · errors ${c.uhd.errors}`);
+  if (c.interlock) add('Interlock', c.interlock);
+  dl.append(el('div', {class: 'section-label'}, 'UE on this cell (DU MAC statistics)'));
+  if (!u) add('UE', c.ue && c.ue_stale ? 'no recent report' : 'none');
+  else {
+    add('RNTI', `${u.rnti} · ${u.sync}`);
+    const over = u.pcmax > s.meta.ue_pmax_dbm;
+    const pw = el('dd', {}); pw.append(el('span', {class: 'icon ' + (over ? 'warning' : 'good'), style: 'margin-right:6px'}),
+      document.createTextNode(`PH ${u.ph} dB · PCMAX ${u.pcmax} dBm ` + (over ? `— ABOVE the ${s.meta.ue_pmax_dbm} dBm cap: this UE ignores p-Max` : `(within the ${s.meta.ue_pmax_dbm} dBm cap)`)));
+    dl.append(el('dt', {}, 'UE power'), pw);
+    add('L1 RSRP / CQI', `${u.l1_rsrp != null ? u.l1_rsrp + ' dBm' : '—'} · CQI ${u.cqi ?? '—'}`);
+    add('Downlink', `BLER ${num(u.dl_bler, 3)} · MCS ${u.dl_mcs ?? '—'} · ${num(u.dl_mbps, 2)} Mbit/s`);
+    add('Uplink', `BLER ${num(u.ul_bler, 3)} · MCS ${u.ul_mcs ?? '—'} · SNR ${num(u.ul_snr)} dB`);
+    if (u.ul_rssi != null || u.pucch_rssi != null) {
+      const lvl = Math.max(u.ul_rssi ?? -200, u.pucch_rssi ?? -200), level = lvl > -12 ? 'critical' : lvl > -20 ? 'warning' : 'good';
+      const rd = el('dd', {}); rd.append(el('span', {class: 'icon ' + level, style: 'margin-right:6px'}),
+        document.createTextNode(`PUSCH ${num(u.ul_rssi)} · PUCCH ${num(u.pucch_rssi)} dBFS — ${level === 'good' ? 'headroom ' + num(-12 - lvl, 0) + ' dB to clipping' : level === 'warning' ? 'getting close to clipping' : 'CLIPPING RISK'}`));
+      dl.append(el('dt', {}, 'RX level at X310'), rd);
+    }
+  }
+  card.append(dl); return card;
+}
+
+// ------------------------------------------------------------------ charts
+function niceTicks(lo, hi, n = 4) {
+  if (hi - lo < 1e-9) { lo -= 1; hi += 1; }
+  const raw = (hi - lo) / n, mag = Math.pow(10, Math.floor(Math.log10(raw))), step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => s >= raw);
+  const out = []; for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(6)); return {ticks: out, lo: Math.min(lo, out[0]), hi: Math.max(hi, out[out.length - 1])};
+}
+function chart(host, s, series, {unit, digits = 1, losses = null, fixedLo = null, threshold = null}) {
+  host.replaceChildren();
+  const W = host.clientWidth || 600, H = 210, m = {l: 44, r: 52, t: 14, b: 26}, iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const t1 = s.now, t0 = t1 - WINDOW, svg = svgEl('svg', {viewBox: `0 0 ${W} ${H}`, role: 'img'});
+  const vis = series.map(se => ({...se, pts: se.pts.filter(p => p[0] >= t0 - 2 && p[1] != null)}));
+  const vals = vis.flatMap(se => se.pts.map(p => p[1]));
+  host.append(svg);
+  if (!vals.length && !(losses && losses.length)) { host.append(el('div', {class: 'empty', style: 'position:absolute;left:50px;top:90px'}, 'no data in this window')); }
+  let lo = vals.length ? Math.min(...vals) : 0, hi = vals.length ? Math.max(...vals) : 1;
+  if (fixedLo != null) lo = Math.min(fixedLo, lo);
+  if (threshold != null) hi = Math.max(threshold + 2, hi);
+  const pad = (hi - lo) * 0.1 || 1, nt = niceTicks(lo - pad, hi + pad);
+  const x = t => m.l + (t - t0) / (t1 - t0) * iw, y = v => m.t + ih - (v - nt.lo) / (nt.hi - nt.lo) * ih;
+  const grid = css('--grid'), muted = css('--muted'), ink2 = css('--ink-2'), surf = css('--surface');
+  for (const v of nt.ticks) {
+    svg.append(svgEl('line', {x1: m.l, x2: m.l + iw, y1: y(v), y2: y(v), stroke: grid, 'stroke-width': 1}));
+    const tx = svgEl('text', {x: m.l - 6, y: y(v) + 4, 'text-anchor': 'end', 'font-size': 11, fill: muted}); tx.textContent = v; svg.append(tx);
+  }
+  const step = WINDOW <= 60 ? 15 : WINDOW <= 120 ? 30 : WINDOW <= 300 ? 60 : 120;
+  for (let k = 0; k <= WINDOW; k += step) {
+    const tx = svgEl('text', {x: x(t1 - k), y: H - 6, 'text-anchor': 'middle', 'font-size': 11, fill: muted}); tx.textContent = k === 0 ? 'now' : `−${k} s`; svg.append(tx);
+  }
+  svg.append(svgEl('line', {x1: m.l, x2: m.l + iw, y1: m.t + ih, y2: m.t + ih, stroke: css('--axis'), 'stroke-width': 1}));
+  for (const h of s.handovers) {           // handover markers: band from decision to completion
+    const a = h.t_trigger, b = h.t_complete || (h.outcome === 'in progress' ? t1 : h.t_trigger);
+    if (b < t0 || a > t1) continue;
+    svg.append(svgEl('rect', {x: x(Math.max(a, t0)), y: m.t, width: Math.max(2, x(Math.min(b, t1)) - x(Math.max(a, t0))), height: ih, fill: css('--wash')}));
+    svg.append(svgEl('line', {x1: x(a), x2: x(a), y1: m.t, y2: m.t + ih, stroke: ink2, 'stroke-width': 1}));
+    const lab = svgEl('text', {x: x(a) + 4, y: m.t + 10, 'font-size': 11, fill: ink2}); lab.textContent = `HO#${h.id}`; svg.append(lab);
+  }
+  if (threshold != null) {                 // reference line, labelled; status colour plus text, never colour alone
+    svg.append(svgEl('line', {x1: m.l, x2: m.l + iw, y1: y(threshold), y2: y(threshold), stroke: css('--critical'), 'stroke-width': 1}));
+    const lab = svgEl('text', {x: m.l + iw - 4, y: y(threshold) - 4, 'text-anchor': 'end', 'font-size': 11, fill: ink2}); lab.textContent = 'clipping risk'; svg.append(lab);
+  }
+  if (losses) for (const t of losses) if (t >= t0) svg.append(svgEl('path', {d: `M ${x(t) - 4} ${m.t + ih} L ${x(t) + 4} ${m.t + ih} L ${x(t)} ${m.t + ih - 7} Z`, fill: css('--critical')}));
+  const ends = [];
+  for (const se of vis) {
+    if (!se.pts.length) continue;
+    let d = '', prev = null;
+    for (const [t, v] of se.pts) { d += (prev == null || t - prev > 5 ? 'M' : 'L') + x(Math.max(t, t0)).toFixed(1) + ' ' + y(v).toFixed(1) + ' '; prev = t; }
+    const color = css(se.colorVar);
+    svg.append(svgEl('path', {d, fill: 'none', stroke: color, 'stroke-width': se.dots ? 0 : 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round'}));
+    if (se.dots) for (const [t, v] of se.pts) svg.append(svgEl('circle', {cx: x(t), cy: y(v), r: 2, fill: color}));
+    const [lt, lv] = se.pts[se.pts.length - 1];
+    if (lt >= t0) { svg.append(svgEl('circle', {cx: x(lt), cy: y(lv), r: 4, fill: color, stroke: surf, 'stroke-width': 2})); ends.push({y: y(lv), x: x(lt), text: se.label}); }
+  }
+  ends.sort((p, q) => p.y - q.y);
+  if (ends.length > 1 && !ends.some((e, i) => i && e.y - ends[i - 1].y < 13))   // direct labels only when they don't collide
+    for (const e of ends) { const tx = svgEl('text', {x: e.x + 8, y: e.y + 4, 'font-size': 11, fill: css('--ink')}); tx.textContent = e.text; svg.append(tx); }
+  // crosshair + tooltip
+  const cross = svgEl('line', {y1: m.t, y2: m.t + ih, stroke: ink2, 'stroke-width': 1, visibility: 'hidden'}); svg.append(cross);
+  const hit = svgEl('rect', {x: m.l, y: m.t, width: iw, height: ih, fill: 'transparent', tabindex: 0}); svg.append(hit);
+  const tip = el('div', {class: 'tip'}); tip.hidden = true; host.append(tip);
+  const show = px => {
+    const t = t0 + (px - m.l) / iw * (t1 - t0); cross.setAttribute('x1', px); cross.setAttribute('x2', px); cross.setAttribute('visibility', 'visible');
+    tip.replaceChildren(el('div', {class: 't'}, fmtClock(t)));
+    for (const se of vis) {
+      let best = null; for (const p of se.pts) if (!best || Math.abs(p[0] - t) < Math.abs(best[0] - t)) best = p;
+      const row = el('div'); row.append(el('span', {class: 'key', style: `background:${css(se.colorVar)}`}), el('span', {class: 'v'}, best && Math.abs(best[0] - t) < 3 ? `${num(best[1], digits)} ${unit}` : '—'), document.createTextNode(' ' + se.label));
+      tip.append(row);
+    }
+    tip.hidden = false; tip.style.left = Math.min(px + 12, W - 170) + 'px'; tip.style.top = '8px';
+  };
+  hit.addEventListener('pointermove', ev => { const r = svg.getBoundingClientRect(); show((ev.clientX - r.left) * W / r.width); });
+  hit.addEventListener('pointerleave', () => { cross.setAttribute('visibility', 'hidden'); tip.hidden = true; });
+  hit.addEventListener('focus', () => show(m.l + iw)); hit.addEventListener('blur', () => { cross.setAttribute('visibility', 'hidden'); tip.hidden = true; });
+}
+
+// ------------------------------------------------------------------ page
+function render(s) {
+  last = s;
+  const m = s.meta;
+  $('subtitle').textContent = `${m.experiment} · ${m.topology.toUpperCase()} · ${m.trigger} trigger · band n${m.band} ${m.duplex} · ${m.prb} PRB · DL ${m.dl_mhz} / UL ${m.ul_mhz} MHz · ${m.sample_rate_msps} MS/s · UE pMax ${m.ue_pmax_dbm} dBm`;
+  $('clock').textContent = fmtClock(s.now);
+  const replay = m.source.startsWith('replay');
+  $('banner').hidden = !replay; $('banner').textContent = !replay ? '' : m.source.includes('recorded timing')
+    ? `REPLAY of a recorded ${m.mode} run: events keep their recorded spacing (played back at the chosen speed).`
+    : 'REPLAY of an earlier RFsim run: timings are approximate and nothing here is an RF measurement.';
+  drawTopo(s);
+  $('cells').replaceChildren(...s.cells.map(c => cellCard(c, s)));
+  $('legend').replaceChildren(...s.cells.map(c => { const sp = el('span'); sp.append(el('span', {class: 'key ' + (c.slot === 1 ? 'k1' : 'k2')}), document.createTextNode(`${c.name} · PCI ${c.pci} · X310 ${c.usrp_ip}`)); return sp; }),
+    (() => { const sp = el('span'); sp.append(el('span', {class: 'key', style: `background:${css('--wash')};height:10px;width:12px`}), document.createTextNode('handover (decision → complete)')); return sp; })());
+  const per = (key) => s.cells.map(c => ({label: c.name, colorVar: seriesVar(c.slot), pts: s.series[key][c.name]}));
+  const reported = per('rsrp').some(x => x.pts.length), rsrp = reported ? per('rsrp') : per('l1_rsrp');
+  $('rsrpSrc').textContent = reported ? 'SS-RSRP per cell from UE MeasurementReports, dBm' : 'DU L1 RSRP (CSI reports), dBm: no UE MeasurementReports yet';
+  chart($('ch-rsrp'), s, rsrp, {unit: 'dBm', digits: 0});
+  chart($('ch-dl'), s, per('dl_mbps'), {unit: 'Mbit/s', digits: 2, fixedLo: 0});
+  chart($('ch-snr'), s, per('ul_snr'), {unit: 'dB', digits: 1});
+  chart($('ch-rssi'), s, per('ul_rssi'), {unit: 'dBFS', digits: 1, threshold: -12});
+  chart($('ch-rtt'), s, [{label: 'RTT', colorVar: '--ink-2', dots: true, pts: s.rtt.filter(r => r[1] != null).map(r => [r[0], r[1]])}],
+        {unit: 'ms', digits: 1, fixedLo: 0, losses: s.rtt.filter(r => r[2] > 0).map(r => r[0])});
+  const rows = s.handovers.slice().reverse().map(h => {
+    const tr = el('tr'), ms = (a, b) => a && b ? num((b - a) * 1e3, 1) : '—';
+    for (const v of [h.id, h.ue_id, h.kind, `${h.source ?? '?'} → ${h.target ?? '?'}`, fmtT(h.t_trigger), ms(h.t_trigger, h.t_command), ms(h.t_command, h.t_complete), ms(h.t_trigger, h.t_complete)]) tr.append(el('td', {}, String(v)));
+    const td = el('td'); td.append(chip(h.outcome === 'complete' ? 'good' : h.outcome === 'in progress' ? 'warning' : 'critical', h.outcome)); tr.append(td); return tr;
+  });
+  $('hoRows').replaceChildren(...(rows.length ? rows : [(() => { const tr = el('tr'); tr.append(el('td', {colspan: 9, class: 'empty'}, 'none yet')); return tr; })()]));
+  $('feed').replaceChildren(...s.feed.slice().reverse().map(f => {
+    const li = el('li'); li.append(el('span', {class: 'ts'}, fmtT(f.t)), el('span', {class: 'icon ' + ({good: 'good', warning: 'warning', critical: 'critical'}[f.level] || 'off'), 'aria-label': f.level}), el('span', {class: 'node'}, f.node), el('span', {}, f.text)); return li;
+  }));
+  const rl = s.rx_latest;
+  $('rxcard').hidden = !rl;
+  if (rl) {
+    const kv = $('rxkv'); kv.replaceChildren();
+    const add = (k, v, level) => { const dd = el('dd'); if (level) dd.append(el('span', {class: 'icon ' + level, style: 'margin-right:6px'})); dd.append(document.createTextNode(v)); kv.append(el('dt', {}, k), dd); };
+    if (rl.start) add('Receiver', `${rl.start.args} · ${num(rl.start.freq_hz / 1e6, 2)} MHz · gain ${rl.start.gain_db} dB · 10 MHz ${rl.start.ref_locked ? 'locked' : 'NOT locked'}`);
+    if (rl.burst_dbfs != null) {
+      add('Cell identity', rl.pss_detected ? `NR PSS found, N_ID2 ${rl.pss_nid2} (expected ${rl.expected_nid2}), every ${rl.pss_period_ms} ms, correlation ${num(rl.pss_rho, 2)}` : `no NR PSS (best correlation ${num(rl.pss_rho, 2)})`,
+          rl.pss_detected ? (rl.nid2_matches === false ? 'warning' : 'good') : 'critical');
+      add('Signal', `SSB bursts ${num(rl.burst_dbfs)} dBFS, ${num(rl.burst_above_floor_db)} dB above the idle floor (${num(rl.floor_dbfs)} dBFS)`);
+      add('Headroom', `peak ${num(rl.peak_dbfs)} dBFS: ${num(rl.headroom_db)} dB to clipping`, rl.headroom_db < 6 ? 'warning' : 'good');
+      add('Capture errors', String(rl.stream_errors));
+    }
+    chart($('ch-rx'), s, [{label: 'SSB burst', colorVar: '--s1', pts: s.rxmon.map(r => [r[0], r[1]])},
+                          {label: 'idle floor', colorVar: '--ink-2', pts: s.rxmon.map(r => [r[0], r[2]])}], {unit: 'dBFS', digits: 1});
+  }
+  $('trigBox').hidden = !m.allow_trigger;
+  $('trigCmd').textContent = `ci trigger_f1_ho ${s.ue.ue_id ?? ''}`;
+  $('trigBtn').disabled = s.ue.ue_id == null || s.handovers.some(h => h.outcome === 'in progress');
+}
+
+$('trigBtn').addEventListener('click', () => { $('trigConfirm').hidden = false; $('trigBtn').hidden = true; });
+$('trigNo').addEventListener('click', () => { $('trigConfirm').hidden = true; $('trigBtn').hidden = false; });
+$('trigYes').addEventListener('click', async () => {
+  $('trigConfirm').hidden = true; $('trigBtn').hidden = false; $('trigResult').textContent = 'sending…';
+  try {
+    const r = await fetch('/api/trigger', {method: 'POST', headers: {'X-Requested-By': 'oaiho-dashboard'}});
+    const j = await r.json(); $('trigResult').textContent = j.ok ? `acknowledged: ${(j.row.response || '').trim().slice(0, 80)}` : `refused: ${j.error}`;
+  } catch (e) { $('trigResult').textContent = 'request failed: ' + e; }
+});
+
+const conn = (level, text) => { const c = $('conn'); c.replaceChildren(el('span', {class: 'icon ' + level}), document.createTextNode(text)); };
+fetch('/api/state').then(r => r.json()).then(s => { if (!last) render(s); }).catch(() => {});   // first paint without waiting for the stream
+const es = new EventSource('/api/stream');
+es.onopen = () => conn('good', 'live');
+es.onmessage = ev => { const s = JSON.parse(ev.data); conn('good', s.meta.source.startsWith('replay') ? 'replay' : 'live'); render(s); };
+es.onerror = () => conn('critical', 'disconnected — retrying');
+window.addEventListener('resize', () => last && render(last));
+</script>
+</body>
+</html>

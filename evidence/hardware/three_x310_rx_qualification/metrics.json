@@ -1,0 +1,54 @@
+[
+  {
+    "phase": "ue_alone",
+    "radio": "ue",
+    "duration_s": 60,
+    "received_samples": 460781397,
+    "dropped_samples": 0,
+    "dropped_sample_fraction": 0.0,
+    "rx_sequence_errors": 0,
+    "overruns": 0,
+    "timeouts_rx": 0,
+    "transmitted_samples": 0,
+    "adapter_rx_missed_delta_for_phase": 0
+  },
+  {
+    "phase": "three_concurrent",
+    "radio": "du0",
+    "duration_s": 60,
+    "received_samples": 460706109,
+    "dropped_samples": 67340,
+    "dropped_sample_fraction": 0.0001461455735918499,
+    "rx_sequence_errors": 46,
+    "overruns": 0,
+    "timeouts_rx": 0,
+    "transmitted_samples": 0,
+    "adapter_rx_missed_delta_for_phase": 559
+  },
+  {
+    "phase": "three_concurrent",
+    "radio": "du1",
+    "duration_s": 60,
+    "received_samples": 460701094,
+    "dropped_samples": 71344,
+    "dropped_sample_fraction": 0.00015483565013061826,
+    "rx_sequence_errors": 46,
+    "overruns": 0,
+    "timeouts_rx": 0,
+    "transmitted_samples": 0,
+    "adapter_rx_missed_delta_for_phase": 559
+  },
+  {
+    "phase": "three_concurrent",
+    "radio": "ue",
+    "duration_s": 60,
+    "received_samples": 460721935,
+    "dropped_samples": 64792,
+    "dropped_sample_fraction": 0.000140611689103623,
+    "rx_sequence_errors": 46,
+    "overruns": 0,
+    "timeouts_rx": 0,
+    "transmitted_samples": 0,
+    "adapter_rx_missed_delta_for_phase": 559
+  }
+]

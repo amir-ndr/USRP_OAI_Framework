@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-09",
+  "python_syntax": "passed",
+  "shell_syntax": "passed",
+  "local_document_links": "passed",
+  "malformed_yaml_cli": "clear exit 2",
+  "tests": 100,
+  "rf_transmission": false,
+  "firmware_backup_sha256": "b8e36f9aafa7c6e8f6b430e59b2f5b326e7d4589df0c32d3ebf99f4f0302ef21",
+  "shared_uplink_mbps": 1000,
+  "runs": {
+    "rfsim_n78_single_002": [
+      2181,
+      0
+    ],
+    "rfsim_n78_two_cell_baseline_001": [
+      2168,
+      0
+    ],
+    "rfsim_n78_handover_001": [
+      2166,
+      2
+    ]
+  }
+}

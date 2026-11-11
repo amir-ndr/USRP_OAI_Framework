@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "usrp-5g-oai"
+version = "0.3.0"
+description = "Unified RFsim and X310 OAI attachment and F1 handover experiments"
+requires-python = ">=3.10"
+dependencies = ["PyYAML>=6.0,<7", "libconf==2.0.1", "numpy>=1.24,<3", "matplotlib>=3.7,<4"]
+
+[project.optional-dependencies]
+plots = ["matplotlib>=3.7,<4"]
+
+[project.scripts]
+oaiho = "usrp_5g_oai.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+usrp_5g_oai = ["upstream.json", "dashboard.html"]

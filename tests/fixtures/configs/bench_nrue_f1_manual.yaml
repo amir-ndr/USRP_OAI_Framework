@@ -1,0 +1,195 @@
+# PHASE 2 - manual F1 handover: X310 A (du0) + X310 B (du1) + third X310 as OAI UE, all CABLED.
+# Needs the second Ethernet adapter (host.links.second_nic) and the six-pad network below.
+# Radios OFF while cabling; antennas removed; slot-B ("RF B") connectors on every X310.
+#   DL:  du0 TX/RX --[30 dB]--+
+#                             +-- 2-way combiner --[30 dB]-- UE RX2
+#        du1 TX/RX --[30 dB]--+
+#   UL:  UE TX/RX  --[30 dB]-- 2-way splitter --+--[30 dB]-- du0 RX2
+#                                               +--[30 dB]-- du1 RX2
+# Every TX-to-RX path: 2 x 30 dB pads + >= 3 dB splitter = >= 61 dB (1 dB/pad tolerance allowed).
+# Six VAT-30A+ in total (you have two). Budget entries are planning ASSUMPTIONS until measured.
+# Qualify phase 1 (configs/bench_nrue_single_cell.yaml) first.
+schema_version: 2
+mode: hardware
+topology: f1
+experiment:
+  name: bench_nrue_f1_manual
+  repetition: 0
+  seed: 1
+paths:
+  oai_root: /home/amirndr/openairinterface5g
+  nr_softmodem: /home/amirndr/openairinterface5g/cmake_targets/ran_build/build/nr-softmodem
+  nr_uesoftmodem: /home/amirndr/openairinterface5g/cmake_targets/ran_build/build/nr-uesoftmodem
+  ue_uicc_config: /home/amirndr/nrue.uicc.conf
+  uhd_prefix: /usr/local            # UHD 4.11 (matches the radios' FPGA images); ignore the apt 4.6 copy
+host:
+  links:
+    # Both radios share this link: two 7.68 MS/s sc16 streams = ~521 Mbit/s per direction.
+    enx00e04c680014: {mbps: 1000, max_utilization: 0.7}
+    # The UE X310 needs its own host-to-switch path: three radios on one link dropped 0.015 % of samples
+    # (46 sequence errors/min per radio) in the 2026-11-09 receive-only test. Rename after plugging it in.
+    second_nic: {mbps: 1000, max_utilization: 0.7}
+clock:
+  octoclock_ip: 192.168.10.3
+plmn:                               # must match ~/oai-cn5g/conf/config.yaml and the SIM
+  mcc: '001'
+  mnc: '01'
+  tac: 1
+  sst: 1
+  sd: null
+core:
+  amf_ip: 192.168.70.132
+cu:
+  gnb_id: 3584
+  f1_ip: 127.0.0.3
+  n2_ip: 192.168.70.129/24          # this host's address on the oai-cn5g docker bridge
+  n3_ip: 192.168.70.129/24
+  telnet_ip: 127.0.0.2
+  telnet_port: 9090
+radio:
+  # 5 MHz FDD, DL 2152.68 MHz / UL 1752.68 MHz, 7.68 MS/s. The only profile whose two streams fit
+  # one 1 GbE link. n78_24prb_30khz (10 MHz TDD) needs one NIC per radio; n78_106prb_30khz needs 10 GbE.
+  profile: n66_25prb_15khz
+  clock_source: external
+  time_source: external
+  continuous_tx: false
+  # Template value is -118 dBm. The 30 dB pad on RX2 attenuates only the uplink, so the UE is asked
+  # to aim 18 dB higher. Harmless for RX safety: the UE is still capped by safety.ue_pmax_dbm.
+  prach_target_dbm: -100
+security:                            # AS algorithms the CU offers; the first one the UE supports wins
+  ciphering: [nea0]
+  integrity: [nia2, nia0]
+  drb_ciphering: true
+  drb_integrity: false
+ue:
+  kind: oai_nrue                     # cots_modem | iphone | oai_nrue | other
+ue_radio:                            # third X310, driven by nr-uesoftmodem (verified 2026-11-09)
+  usrp_args: type=x300,addr=192.168.10.5,serial=34AF675
+  usrp_link: second_nic           # TODO: rename to the real interface of the 2nd Ethernet adapter
+  daughterboard: UBX-160 v2          # slot B, like the other two (FPGA updated to 39.3 / HG)
+  subdev: B:0
+  tx_gain_max_db: 31.5               # get_tx_gain_range on this radio
+  tx_atten_db: 31                    # --ue-txgain = ATTENUATION from max -> UHD TX gain 0.5 dB (OAI default 0 = FULL power)
+  rx_gain: 110                       # --ue-rxgain (OAI units): ~29 dB UHD at 2152.68 MHz (X310 cal 81 dB)
+  clock_source: external             # 10 MHz from the OctoClock (lock verified); no PPS needed for the UE
+handover:
+  trigger: manual
+  periodic_reports: false            # manual baseline first; set true in a new run to qualify RSRP reporting
+  offset_db: 3.0
+  hysteresis_db: 1.0
+  ttt_ms: 160
+cells:
+- name: du0
+  pci: 0
+  nr_cellid: 12345678
+  du_id: 3584
+  gnb_id: 3584
+  f1_ip: 127.0.0.4
+  n2_ip: 192.168.70.129/24
+  n3_ip: 192.168.70.129/24
+  ssb_bitmap: 1                      # SSB index 0 (4 SSB positions in this FDD profile)
+  usrp_ip: 192.168.10.2
+  usrp_link: enx00e04c680014
+  serial: 34BA717                    # uhd_usrp_probe 2026-11-09
+  daughterboard: UBX-160 v2
+  subdev: B:0                        # UBX-160 v2 sits in slot B (Radio#1); slot A is empty
+  att_tx_db: 31                      # UHD TX gain = 31.5 - 31 = 0.5 dB (minimum useful). Step down 3 dB at a time.
+  att_rx_db: 0
+  max_rxgain: 110                    # UHD RX gain = 110 - 0 - 82 (X310 cal at 1.75 GHz) = 28 dB
+  tx_gain_min_db: 0.0                # UBX-160 range reported by uhd_usrp_probe; verify against yours
+  tx_gain_max_db: 31.5
+  rx_gain_min_db: 0.0
+  rx_gain_max_db: 31.5
+  telnet_ip: 127.0.0.4
+  telnet_port: 9090
+- name: du1
+  pci: 1
+  nr_cellid: 11111111
+  du_id: 3585
+  gnb_id: 3585
+  f1_ip: 127.0.0.5
+  n2_ip: 192.168.70.129/24
+  n3_ip: 192.168.70.129/24
+  ssb_bitmap: 2                      # SSB index 1: different symbols from du0
+  usrp_ip: 192.168.20.6
+  usrp_link: enx00e04c680014
+  serial: 34BA72C                    # uhd_usrp_probe 2026-11-09
+  daughterboard: UBX-160 v2
+  subdev: B:0                        # UBX-160 v2 sits in slot B (Radio#1); slot A is empty
+  att_tx_db: 31
+  att_rx_db: 0
+  max_rxgain: 110
+  tx_gain_min_db: 0.0
+  tx_gain_max_db: 31.5
+  rx_gain_min_db: 0.0
+  rx_gain_max_db: 31.5
+  telnet_ip: 127.0.0.5
+  telnet_port: 9090
+rfsim:
+  ue_server_ip: 127.0.0.1
+  port: 4043
+rfsim_channel:
+  enabled: false
+  model: AWGN
+  ploss_db: 0.0
+  noise_power_db: -80.0
+  forgetfact: 0.0
+  offset_samples: 0
+  ds_tdl: 0.03
+attenuator:
+  adapter_argv: []
+  readback_qualified: false
+  min_db: 0
+  max_db: 60
+  safe_db: 60
+  minimum_interval_s: 1.0
+  maximum_lateness_s: 0.5
+  timeout_s: 3.0
+safety:
+  rf_setup: conducted                # cables and fixed attenuators only, no antennas
+  max_uhd_tx_gain_db: 6.0            # hard cap: validate/render refuse more; the runner kills a DU that reports more
+  ue_pmax_dbm: 0                     # broadcast p-Max: the UE may not transmit above 0 dBm (shown live as PCMAX)
+  # Set each flag to true ONLY after doing the check in docs/RUNBOOK.md (step 5-7).
+  rf_path_reviewed: false            # cabled network built as drawn above, every pad measured or checked
+  spectrum_authorized: false         # conducted only: confirm nothing radiates (no antennas anywhere)
+  clock_and_pps_verified: true       # oaiho clock-check --execute passed 2026-11-09 (both ref_locked, same PPS epoch)
+  host_time_synchronized: false      # chrony/NTP in sync (single host: still check `chronyc tracking`)
+  single_cell_attach_verified: false # each cell alone carried a UE data session
+  gain_mapping_verified: false       # DU logs showed Actual TX/RX gain = expected (`oaiho gains`)
+  evidence_note: ''                  # TODO: where your photos/measurements/notes are kept
+  receivers:
+  # PLANNING values for the six-pad network ('auto' = nominal UBX max minus backoff at the 6 dB cap).
+  # Replace with measured/justified numbers before --live; the gate refuses 'auto' and ASSUMPTION.
+  - name: du0
+    max_input_dbm: -15.0
+    margin_db: 10.0
+    limit_source: Ettus UBX maximum RF input -15 dBm (kb.ettus.com/UBX)
+    paths:
+    - {source: du0, source_peak_dbm: auto, minimum_passive_loss_db: 30.0, uncertainty_db: 3.0,
+       evidence: ASSUMPTION internal TX/RX-to-RX2 isolation >= 30 dB; measure with the TX-gain-0 loopback}
+    - {source: du1, source_peak_dbm: auto, minimum_passive_loss_db: 100.0, uncertainty_db: 3.0,
+       evidence: ASSUMPTION du1 reaches du0 RX2 only via its pad + combiner isolation + du0 pad + du0 internal isolation}
+    - {source: ue, source_peak_dbm: auto, minimum_passive_loss_db: 61.0, uncertainty_db: 3.0,
+       evidence: ASSUMPTION UE TX/RX -> 30 dB -> splitter (>= 3 dB) -> 30 dB -> du0 RX2; verify by loopback}
+  - name: du1
+    max_input_dbm: -15.0
+    margin_db: 10.0
+    limit_source: Ettus UBX maximum RF input -15 dBm (kb.ettus.com/UBX)
+    paths:
+    - {source: du1, source_peak_dbm: auto, minimum_passive_loss_db: 30.0, uncertainty_db: 3.0,
+       evidence: ASSUMPTION internal TX/RX-to-RX2 isolation >= 30 dB; measure with the TX-gain-0 loopback}
+    - {source: du0, source_peak_dbm: auto, minimum_passive_loss_db: 100.0, uncertainty_db: 3.0,
+       evidence: ASSUMPTION du0 reaches du1 RX2 only via its pad + combiner isolation + du1 pad + du1 internal isolation}
+    - {source: ue, source_peak_dbm: auto, minimum_passive_loss_db: 61.0, uncertainty_db: 3.0,
+       evidence: ASSUMPTION UE TX/RX -> 30 dB -> splitter (>= 3 dB) -> 30 dB -> du1 RX2; verify by loopback}
+  - name: ue
+    max_input_dbm: -15.0
+    margin_db: 10.0
+    limit_source: Ettus UBX maximum RF input -15 dBm (kb.ettus.com/UBX); the UE radio is a UBX-160 v2
+    paths:
+    - {source: du0, source_peak_dbm: auto, minimum_passive_loss_db: 61.0, uncertainty_db: 3.0,
+       evidence: ASSUMPTION du0 TX/RX -> 30 dB -> combiner (>= 3 dB) -> 30 dB -> UE RX2; verify by loopback}
+    - {source: du1, source_peak_dbm: auto, minimum_passive_loss_db: 61.0, uncertainty_db: 3.0,
+       evidence: ASSUMPTION du1 TX/RX -> 30 dB -> combiner (>= 3 dB) -> 30 dB -> UE RX2; verify by loopback}
+    - {source: ue, source_peak_dbm: auto, minimum_passive_loss_db: 30.0, uncertainty_db: 3.0,
+       evidence: ASSUMPTION internal TX/RX-to-RX2 isolation >= 30 dB on the UE X310; measure with the loopback}

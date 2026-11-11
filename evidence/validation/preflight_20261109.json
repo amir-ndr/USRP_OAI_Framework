@@ -1,0 +1,80 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "check": "oai_checkout_pin",
+      "status": "ok",
+      "detail": "HEAD 1143f7500e5e vs pin 1143f7500e5e"
+    },
+    {
+      "check": "oai_checkout_clean",
+      "status": "ok",
+      "detail": "no tracked edits"
+    },
+    {
+      "check": "nr_softmodem",
+      "status": "ok",
+      "detail": "/home/amirndr/openairinterface5g/cmake_targets/ran_build/build/nr-softmodem"
+    },
+    {
+      "check": "telnet_libs",
+      "status": "ok",
+      "detail": "libtelnetsrv + ci module"
+    },
+    {
+      "check": "oai_usrp_driver",
+      "status": "ok",
+      "detail": "/home/amirndr/openairinterface5g/cmake_targets/ran_build/build/liboai_usrpdevif.so"
+    },
+    {
+      "check": "oai_links_uhd",
+      "status": "ok",
+      "detail": "/usr/local/lib/libuhd.so.4.11.0 (expected under /usr/local)"
+    },
+    {
+      "check": "uhd_version",
+      "status": "ok",
+      "detail": "UHD 4.11.0.HEAD-0-g0d7ed3b1"
+    },
+    {
+      "check": "uhd_duplicates",
+      "status": "warn",
+      "detail": "apt UHD (libuhd-dev 4.6.0.0+ds1-5.1ubuntu0.24.04.1; libuhd4.6.0t64 4.6.0.0+ds1-5.1ubuntu0.24.04.1; python3-uhd 4.6.0.0+ds1-5.1ubuntu0.24.04.1; uhd-host 4.6.0.0+ds1-5.1ubuntu0.24.04.1) AND /usr/local/lib/libuhd.so.4.11.0: always use /usr/local/bin tools; plain `python3 -c \"import uhd\"` loads the apt bindings"
+    },
+    {
+      "check": "x310_images",
+      "status": "ok",
+      "detail": "/usr/local/share/uhd/images/usrp_x310_fpga_HG.bit"
+    },
+    {
+      "check": "uhd_python",
+      "status": "ok",
+      "detail": "/usr/local/lib/python3.12/site-packages (has OctoClock API)"
+    },
+    {
+      "check": "virtualization",
+      "status": "warn",
+      "detail": "vmware guest: real-time X310 streaming must be qualified (benchmark first)"
+    },
+    {
+      "check": "active radio transport routes",
+      "status": "fail",
+      "detail": "ue: configured host interface 'nic_ue' is absent"
+    },
+    {
+      "check": "cu_n2_address",
+      "status": "ok",
+      "detail": "192.168.70.129 present"
+    },
+    {
+      "check": "core_containers",
+      "status": "warn",
+      "detail": "missing: ['mysql', 'oai-amf', 'oai-ausf', 'oai-nrf', 'oai-smf', 'oai-udm', 'oai-udr', 'oai-upf']"
+    },
+    {
+      "check": "icmp_probe",
+      "status": "info",
+      "detail": "ICMP probe needs sudo, or: sudo sysctl -w net.ipv4.ping_group_range='0 2147483647'"
+    }
+  ]
+}
